@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block title %}Riwayat Absensi - Sistem Absensi PKL{% endblock %}
+
+{% block content %}
+<div class="history-container">
+    <h2>Riwayat Absensi</h2>
+    
+    {% if attendances %}
+    <div class="table-responsive">
+        <table class="attendance-table">
+            <thead>
+                <tr>
+                    <th>Tanggal</th>
+                    <th>Jam Masuk</th>
+                    <th>Status</th>
+                    <th>Jenis Kehadiran</th>
+                    <th>Aktivitas</th>
+                    <th>Foto</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for attendance in attendances %}
+                <tr>
+                    <td>{{ attendance.date.strftime('%d-%m-%Y') }}</td>
+                    <td>{{ attendance.time_in.strftime('%H:%M') }}</td>
+                    <td><span class="badge badge-{{ attendance.status }}">{{ attendance.status }}</span></td>
+                    <td>{{ attendance.attendance_type }}</td>
+                    <td>{{ attendance.activity }}</td>
+                    <td>
+                        {% if attendance.photo_path %}
+                        <a href="{{ url_for('static', filename=attendance.photo_path) }}" target="_blank">
+                            Lihat Foto
+                        </a>
+                        {% else %}
+                        Tidak ada foto
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <p>Belum ada riwayat absensi.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

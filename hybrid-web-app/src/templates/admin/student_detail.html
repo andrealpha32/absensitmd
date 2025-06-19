@@ -1,0 +1,51 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Detail Siswa - {{ student.name }}{% endblock %}
+
+{% block content %}
+<div class="student-detail">
+    <h2>Detail Siswa PKL</h2>
+    <div class="student-info">
+        <h3>{{ student.name }}</h3>
+        <p>Email: {{ student.email }}</p>
+        <p>Perusahaan: {{ student.company or 'Belum diisi' }}</p>
+        <p>Pembimbing: {{ student.supervisor or 'Belum diisi' }}</p>
+    </div>
+
+    <div class="attendance-history">
+        <h3>Riwayat Kehadiran</h3>
+        <table class="attendance-table">
+            <thead>
+                <tr>
+                    <th>Tanggal</th>
+                    <th>Jam Masuk</th>
+                    <th>Status</th>
+                    <th>Aktivitas</th>
+                    <th>Dokumentasi</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for attendance in attendances %}
+                <tr>
+                    <td>{{ attendance.date.strftime('%d-%m-%Y') }}</td>
+                    <td>{{ attendance.time_in.strftime('%H:%M') }}</td>
+                    <td><span class="badge badge-{{ attendance.attendance_type }}">
+                        {{ attendance.attendance_type }}
+                    </span></td>
+                    <td>{{ attendance.activity }}</td>
+                    <td>
+                        {% if attendance.photo_path %}
+                        <a href="{{ url_for('static', filename=attendance.photo_path) }}" target="_blank">
+                            Lihat Foto
+                        </a>
+                        {% else %}
+                        Tidak ada foto
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

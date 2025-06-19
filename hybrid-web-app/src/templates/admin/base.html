@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin-responsive.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin-table.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin-modal.css') }}">
+    <title>{% block title %}Admin Panel - Sistem Absensi PKL{% endblock %}</title>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="container">
+                <div class="nav-left">
+                    <h1>Admin Panel - Sistem Absensi PKL</h1>
+                    <div class="digital-clock">
+                        <span class="time"></span>
+                        <span class="date"></span>
+                    </div>
+                </div>
+                {% if session.get('admin_logged_in') %}
+                <ul class="nav-links">
+                    <li><a href="{{ url_for('admin_dashboard') }}"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                    <li><a href="{{ url_for('admin_logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                </ul>
+                {% endif %}
+            </div>
+        </nav>
+    </header>
+
+    <main class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <p>&copy; 2023 Sistem Absensi PKL - Admin Panel</p>
+    </footer>
+      <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/clock.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/attendance-modal.js') }}"></script>
+</body>
+</html>
+    <script src="{{ url_for('static', filename='js/clock.js') }}"></script>
+</body>
+</html>

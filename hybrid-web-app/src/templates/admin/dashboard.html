@@ -1,0 +1,319 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="admin-dashboard">
+    <h2>Dashboard Admin</h2>
+
+    <div class="statistics-cards">
+        <div class="stat-card">
+            <h3>Total Siswa</h3>
+            <p class="stat-number">{{ statistics.total_students }}</p>
+        </div>
+        <div class="stat-card">
+            <h3>Absensi Hari Ini</h3>
+            <p class="stat-number">{{ statistics.today_attendance }}</p>
+        </div>
+        <div class="stat-card">
+            <h3>Total Absensi</h3>
+            <p class="stat-number">{{ statistics.total_attendance }}</p>
+        </div>
+    </div>    <div class="admin-controls">
+        <div class="section-header">
+            <h3>Daftar Siswa PKL (Total: {{ total_students }})</h3>
+            <div class="table-controls">
+                <div class="search-box">
+                    <input type="text" id="studentSearch" placeholder="Cari siswa..." onkeyup="filterStudents()">
+                    <i class="fas fa-search"></i>
+                </div>
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-status="all">Semua</button>
+                    <button class="filter-btn" data-status="hadir">Hadir</button>
+                    <button class="filter-btn" data-status="sakit">Sakit</button>
+                    <button class="filter-btn" data-status="izin">Izin</button>
+                    <button class="filter-btn" data-status="absent">Belum Absen</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="student-table-container">
+            <div class="table-responsive">
+                <table class="student-table">
+                    <thead>
+                        <tr>
+                            <th class="sortable" data-sort="name">
+                                <div class="th-content">
+                                    <span>Nama</span>
+                                    <i class="fas fa-sort"></i>
+                                </div>
+                            </th>
+                            <th class="sortable" data-sort="email">
+                                <div class="th-content">
+                                    <span>Email</span>
+                                    <i class="fas fa-sort"></i>
+                                </div>
+                            </th>
+                            <th>Perusahaan</th>
+                            <th class="sortable" data-sort="status">
+                                <div class="th-content">
+                                    <span>Status Hari Ini</span>
+                                    <i class="fas fa-sort"></i>
+                                </div>
+                            </th>
+                            <th class="sortable" data-sort="time">
+                                <div class="th-content">
+                                    <span>Jam Masuk</span>
+                                    <i class="fas fa-sort"></i>
+                                </div>
+                            </th>
+                            <th>Kegiatan</th>
+                            <th>Dokumentasi</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in students %}
+                        <tr class="student-row">
+                            <td data-label="Nama">
+                                <div class="student-name">
+                                    <div class="avatar">{{ student.name[:2].upper() }}</div>
+                                    <span>{{ student.name }}</span>
+                                </div>
+                            </td>
+                            <td data-label="Email">{{ student.email }}</td>
+                            <td data-label="Perusahaan">
+                                <span class="company-badge">Trimediatama</span>
+                            </td>
+                            <td data-label="Status">
+                                <span class="status-badge status-{{ student.attendance_status.lower() if student.attendance_status else 'absent' }}">
+                                    {% if student.attendance_status %}
+                                        {{ student.attendance_status }}
+                                    {% else %}
+                                        Belum Absen
+                                    {% endif %}
+                                </span>
+                            </td>
+                            <td data-label="Jam Masuk">
+                                {% if student.time_in %}
+                                    <div class="time-info">
+                                        <i class="far fa-clock"></i>
+                                        <span>{{ student.time_in }}</span>
+                                    </div>
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td data-label="Kegiatan">
+                                {% if student.activity %}
+                                    <div class="activity-preview" title="{{ student.activity }}">
+                                        {{ student.activity[:50] }}{% if student.activity|length > 50 %}...{% endif %}
+                                    </div>
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td data-label="Dokumentasi">
+                                {% if student.photo_path %}
+                                    <a href="{{ url_for('static', filename=student.photo_path) }}" 
+                                       class="photo-preview" 
+                                       onclick="event.preventDefault(); confirmPhotoView(this.href);"
+                                       title="Lihat Foto">
+                                        <img src="{{ url_for('static', filename=student.photo_path) }}" 
+                                             alt="Foto {{ student.name }}"
+                                             loading="lazy">
+                                    </a>
+                                {% else %}
+                                    <span class="no-photo">Tidak ada foto</span>
+                                {% endif %}
+                            </td>
+                            <td data-label="Aksi">
+                                <div class="action-buttons">
+                                    <a href="{{ url_for('admin_student_detail', student_id=student.id) }}" 
+                                       class="btn-action view" 
+                                       title="Lihat Detail">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <button class="btn-action edit" 
+                                            title="Edit"
+                                            onclick="editStudent({{ student.id }})">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="calendar-section">
+        <h3>Kalender Kehadiran</h3>
+        <div class="calendar">
+            <div class="calendar-header">
+                <button class="calendar-nav" onclick="prevMonth()">&lt;</button>
+                <h4 id="currentMonth">{{ current_month }}</h4>
+                <button class="calendar-nav" onclick="nextMonth()">&gt;</button>
+            </div>
+            <div class="calendar-days">
+                <div class="day-header">Min</div>
+                <div class="day-header">Sen</div>
+                <div class="day-header">Sel</div>
+                <div class="day-header">Rab</div>
+                <div class="day-header">Kam</div>
+                <div class="day-header">Jum</div>
+                <div class="day-header">Sab</div>
+            </div>
+            <div class="calendar-dates" id="calendarDates">
+                {% for week in calendar_data %}
+                <div class="calendar-week">
+                    {% for day in week %}
+                    <div class="calendar-day {% if day.today %}today{% endif %} 
+                              {% if day.past %}past{% endif %}"
+             onclick="showDayAttendance('{{ year }}', '{{ month }}', '{{ day.date }}')"
+             data-date="{{ '%d-%02d-%02d'|format(year, month, day.date) if day.date else '' }}">
+                        <div class="date-number">{{ day.date }}</div>
+                        {% if day.attendance %}
+                        <div class="attendance-summary">
+                            <div class="summary-item hadir">
+                                <i class="fas fa-check"></i> {{ day.attendance.hadir }}
+                            </div>
+                            <div class="summary-item sakit">
+                                <i class="fas fa-hospital"></i> {{ day.attendance.sakit }}
+                            </div>
+                            <div class="summary-item izin">
+                                <i class="fas fa-clock"></i> {{ day.attendance.izin }}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Attendance Details -->
+<div id="attendanceModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h3>Daftar Kehadiran <span id="selectedDate"></span></h3>
+        <div id="attendanceDetails" class="attendance-list">
+            <div class="table-responsive-modal">
+                <table class="attendance-modal-table">
+                    <thead>
+                        <tr>
+                            <th>Nama Siswa</th>
+                            <th>Status</th>
+                            <th>Waktu</th>
+                            <th>Aktivitas</th>
+                            <th class="text-center">Foto</th>
+                            <th class="text-center">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="attendanceTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('studentSearch');
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    const studentRows = document.querySelectorAll('.student-row');
+    
+    function calculateTotalCounts() {
+        const counts = {
+            'all': 0,
+            'hadir': 0,
+            'sakit': 0,
+            'izin': 0,
+            'belum': 0
+        };
+        
+        studentRows.forEach(row => {
+            const statusElement = row.querySelector('[data-label="Status"] .status-badge');
+            if (statusElement) {
+                counts.all++;
+                const status = statusElement.textContent.trim().toLowerCase();
+                if (status === 'belum absen') {
+                    counts.belum++;
+                } else if (status === 'hadir') {
+                    counts.hadir++;
+                } else if (status === 'sakit') {
+                    counts.sakit++;
+                } else if (status === 'izin') {
+                    counts.izin++;
+                }
+            }
+        });
+        
+        return counts;
+    }
+    
+    function updateCounters(counts) {
+        Object.keys(counts).forEach(key => {
+            const counter = document.getElementById(`${key}-count`);
+            if (counter) counter.textContent = counts[key];
+        });
+    }
+    
+    // Initial counts
+    const initialCounts = calculateTotalCounts();
+    updateCounters(initialCounts);
+    
+    // Filter functionality
+    filterButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const filter = this.dataset.filter;
+            
+            filterButtons.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            
+            studentRows.forEach(row => {
+                const statusElement = row.querySelector('[data-label="Status"] .status-badge');
+                if (statusElement) {
+                    const status = statusElement.textContent.trim().toLowerCase();
+                    if (filter === 'all') {
+                        row.style.display = '';
+                    } else if (filter === 'belum' && status === 'belum absen') {
+                        row.style.display = '';
+                    } else if (status === filter) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                }
+            });
+        });
+    });
+    
+    // Search functionality
+    searchInput.addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        
+        studentRows.forEach(row => {
+            const studentName = row.querySelector('.student-name span').textContent.toLowerCase();
+            row.style.display = studentName.includes(searchTerm) ? '' : 'none';
+        });
+    });
+});
+</script>
+{% endblock %}
+
+{% block styles %}
+<style>
+.text-success { color: #28a745; }
+.text-warning { color: #ffc107; }
+.text-info { color: #17a2b8; }
+.text-danger { color: #dc3545; }
+</style>
+{% endblock %}

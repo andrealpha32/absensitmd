@@ -1,0 +1,204 @@
+/* Login Page Styles */
+.login-container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background: var(--bg-secondary);
+    position: relative;
+    margin-top: -50px; /* Compensate for header height */
+}
+
+.login-container h2 {
+    color: var(--text-primary);
+    margin-bottom: 2rem;
+    font-size: 1.8rem;
+    text-align: center;
+}
+
+.login-form {
+    background: var(--card-bg);
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px var(--shadow-color);
+    width: 100%;
+    max-width: 400px;
+    animation: slideUp 0.3s ease-out;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 0.8rem;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-group input:focus {
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+    outline: none;
+}
+
+.btn-primary {
+    width: 100%;
+    padding: 0.8rem;
+    background: var(--accent-primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-primary:hover {
+    background: var(--accent-secondary);
+}
+
+.text-center {
+    text-align: center;
+    margin-top: 1.5rem;
+    color: var(--text-secondary);
+}
+
+.text-center a {
+    color: var(--accent-primary);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.text-center a:hover {
+    text-decoration: underline;
+}
+
+/* Alert styles */
+.alert {
+    position: fixed;
+    top: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    background: var(--bg-primary);
+    box-shadow: 0 2px 4px var(--shadow-color);
+    z-index: 1000;
+    animation: slideDownFade 5s ease-out forwards;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    max-width: 90%;
+    min-width: 300px;
+}
+
+.alert-close {
+    background: none;
+    border: none;
+    color: inherit;
+    font-size: 1.2rem;
+    padding: 0;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+    margin-left: auto;
+}
+
+.alert-close:hover {
+    opacity: 1;
+}
+
+@keyframes slideDownFade {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -20px);
+    }
+    5% {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+    90% {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -20px);
+        display: none;
+    }
+}
+
+.alert-danger {
+    background: #ffebee;
+    color: #c62828;
+    border-left: 4px solid #c62828;
+}
+
+.alert-success {
+    background: #e8f5e9;
+    color: #2e7d32;
+    border-left: 4px solid #2e7d32;
+}
+
+.alert-warning {
+    background-color: #fff3cd;
+    color: #856404;
+    border-left: 4px solid #ffc107;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -20px);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+}
+
+/* Media Queries */
+@media (max-width: 768px) {
+    .login-container {
+        padding: 1rem;
+        margin-top: 0;
+        justify-content: flex-start;
+        padding-top: 70px; /* Add padding to prevent overlap with header */
+    }
+
+    .login-form {
+        padding: 1.5rem;
+        box-shadow: none;
+    }
+
+    .login-container h2 {
+        font-size: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+}

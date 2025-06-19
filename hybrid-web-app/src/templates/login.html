@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}Login - Sistem Absensi PKL{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <h2>Login Siswa PKL</h2>
+    <form method="POST" action="{{ url_for('login') }}" class="login-form">
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+        </div>
+        <div class="form-group">
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+        <button type="submit" class="btn-primary">Login</button>
+        <p class="text-center">Belum punya akun? <a href="{{ url_for('register') }}">Daftar disini</a></p>
+    </form>
+</div>
+{% endblock %}

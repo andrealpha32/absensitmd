@@ -1,0 +1,179 @@
+/* Mobile-first styles */
+:root {
+    --header-height: 60px; 
+    --bottom-nav-height: 65px;
+    --content-padding: 1rem;
+}
+
+/* Base mobile styles */
+html {
+    font-size: 16px;
+    -webkit-text-size-adjust: 100%;
+}
+
+body {
+    padding-bottom: calc(var(--bottom-nav-height) + 1rem);
+    overflow-x: hidden;
+    background: var(--bg-main);
+}
+
+/* Header & Navigation */
+.header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--header-height);
+    z-index: 1000;
+    background: var(--bg-form);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 2px 8px var(--shadow-color);
+}
+
+/* Bottom Navigation */
+.nav-menu {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: var(--bottom-nav-height);
+    background: var(--nav-bg);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 0.5rem;
+    box-shadow: var(--nav-shadow);
+    z-index: 1000;
+    visibility: hidden;
+    opacity: 0;
+    transform: translateY(100%);
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.nav-menu.active {
+    visibility: visible;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.nav-link {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem 0.8rem;
+    color: var(--nav-text);
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    position: relative;
+    border-radius: 12px;
+    margin: 0 0.25rem;
+    background-color: var(--nav-bg);
+    border: 1px solid rgba(var(--accent-rgb), 0.2);
+}
+
+.nav-link:active {
+    background-color: var(--accent-primary);
+    color: var(--nav-text-hover);
+    transform: scale(0.92);
+    box-shadow: var(--nav-shadow);
+    border-color: var(--accent-primary);
+}
+
+.nav-link.active {
+    color: var(--accent-primary);
+    background-color: var(--nav-bg-active);
+    font-weight: 700;
+    border-color: var(--accent-primary);
+}
+
+.nav-link i {
+    font-size: 1.6rem;
+    margin-bottom: 0.4rem;
+    color: currentColor;
+}
+
+.nav-link:active i {
+    transform: scale(0.9);
+    color: var(--nav-text-hover);
+}
+
+/* Forms & Cards */
+.login-container,
+.attendance-form,
+.dashboard-card {
+    margin: 1rem;
+    padding: 1.25rem;
+    border-radius: 12px;
+    background: var(--bg-form);
+    box-shadow: 0 2px 8px var(--shadow-color);
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 16px;
+    background: var(--input-bg);
+    color: var(--text-primary);
+}
+
+/* Improved Buttons */
+.btn-primary {
+    width: 100%;
+    padding: 0.8rem;
+    border: none;
+    border-radius: 8px;
+    background: var(--accent-primary);
+    color: white;
+    font-size: 1rem;
+    font-weight: 500;
+    margin-top: 1rem;
+    cursor: pointer;
+}
+
+/* Tables Responsive */
+.table-responsive {
+    margin: 0 -1rem;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Loading states */
+.loading {
+    padding: 2rem;
+    text-align: center;
+    color: var(--text-secondary);
+}
+
+/* Fixes for iOS devices */
+input,
+select,
+textarea {
+    -webkit-appearance: none;
+    border-radius: 8px;
+}
+
+@media (max-width: 360px) {
+    html {
+        font-size: 14px;
+    }
+    
+    .login-container,
+    .attendance-form,
+    .dashboard-card {
+        margin: 0.75rem;
+        padding: 1rem;
+    }
+}

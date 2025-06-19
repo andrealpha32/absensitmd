@@ -1,0 +1,247 @@
+.dashboard-container {
+    padding: 60px 1rem 1rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.dashboard-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.dashboard-card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px var(--shadow-color);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px var(--shadow-color);
+}
+
+.dashboard-card.full-width {
+    grid-column: 1 / -1;
+}
+
+.dashboard-card h3 {
+    margin: 0 0 1rem 0;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.dashboard-card h3 i {
+    color: var(--accent-primary);
+}
+
+.welcome-section {
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    color: white;
+    box-shadow: 0 2px 4px var(--shadow-color);
+}
+
+.welcome-section h2 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.welcome-section .email {
+    margin: 0;
+    opacity: 0.9;
+    font-size: 0.9rem;
+}
+
+.attendance-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.attendance-info p {
+    margin: 0;
+    padding: 0.5rem;
+    border-radius: 6px;
+    background: var(--bg-secondary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.attendance-info i {
+    width: 20px;
+    color: var(--accent-primary);
+}
+
+.status {
+    font-weight: 500;
+}
+
+.status.Hadir {
+    color: var(--success-color);
+}
+
+.status.Terlambat {
+    color: var(--warning-color);
+}
+
+.quick-menu {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
+}
+
+.menu-button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.menu-button:hover {
+    background: var(--accent-primary);
+    color: white;
+}
+
+.menu-button i {
+    font-size: 1.1rem;
+}
+
+/* Student Lists */
+.student-list {
+    margin-top: 1rem;
+}
+
+.student-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.8rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.student-item:last-child {
+    border-bottom: none;
+}
+
+.student-name {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.attendance-count {
+    color: var(--success-color);
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.absent-count {
+    color: var(--error-color);
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+/* Chart Container */
+.chart-container {
+    width: 100%;
+    min-height: 300px;
+    margin-top: 1rem;
+}
+
+/* Loading State */
+.loading {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-secondary);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .dashboard-container {
+        padding: 70px 1rem 1rem;
+    }
+
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-card {
+        padding: 1rem;
+    }
+
+    .dashboard-card.full-width {
+        order: 1;
+    }
+
+    .welcome-section {
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .welcome-section h2 {
+        font-size: 1.2rem;
+    }
+
+    .quick-menu {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .menu-button {
+        padding: 0.8rem;
+        font-size: 0.9rem;
+    }
+
+    .chart-container {
+        min-height: 250px;
+    }
+
+    .student-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .student-name {
+        font-size: 0.95rem;
+    }
+}
+
+/* Card Transitions */
+.dashboard-card {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.3s ease forwards;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Stagger card animations */
+.dashboard-card:nth-child(1) { animation-delay: 0.1s; }
+.dashboard-card:nth-child(2) { animation-delay: 0.2s; }
+.dashboard-card:nth-child(3) { animation-delay: 0.3s; }
+.dashboard-card:nth-child(4) { animation-delay: 0.4s; }

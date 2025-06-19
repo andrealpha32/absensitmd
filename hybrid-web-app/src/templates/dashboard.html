@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Sistem Absensi PKL{% endblock title %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="welcome-section">
+        <h2>Selamat Datang, {{ student.name }}!</h2>
+        <p class="email">{{ student.email }}</p>
+    </div>
+
+    <div class="dashboard-grid">
+        <div class="dashboard-card">
+            <h3>Status Absensi Hari Ini</h3>
+            {% if attendance %}
+                <div class="attendance-info">
+                    <p>Check-in: {{ attendance.time_in.strftime('%H:%M') }}</p>
+                    <p class="status {{ attendance.status }}">Status: {{ attendance.status }}</p>
+                    <p>Aktivitas: {{ attendance.activity }}</p>
+                </div>
+            {% else %}
+                <p>Anda belum absen hari ini</p>
+                <a href="{{ url_for('attendance') }}" class="btn-primary">Absen Sekarang</a>
+            {% endif %}
+        </div>
+
+        <div class="dashboard-card">
+            <h3>Menu Cepat</h3>
+            <div class="quick-menu">
+                <a href="{{ url_for('attendance') }}" class="menu-button">
+                    <i class="fas fa-clock"></i>
+                    Absensi
+                </a>
+                <a href="{{ url_for('history') }}" class="menu-button">
+                    <i class="fas fa-history"></i>
+                    Riwayat
+                </a>
+            </div>
+        </div>
+
+        <div class="dashboard-card full-width">
+            <h3>Statistik Kehadiran Mingguan</h3>
+            <canvas id="weeklyChart"></canvas>
+        </div>        <div class="dashboard-card">
+            <h3>Siswa Paling Rajin</h3>
+            <div id="mostPresent" class="student-list">
+                <div class="loading">Memuat data...</div>
+            </div>
+        </div>
+
+        <div class="dashboard-card">
+            <h3>Siswa Sering Tidak Hadir</h3>
+            <div id="mostAbsent" class="student-list">
+                <div class="loading">Memuat data...</div>
+            </div>
+        </div>
+
+        
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Fetch attendance statistics
+    fetch('/api/attendance-stats')
+        .then(response => response.json())
+        .then(data => {
+            // Update weekly chart
+            const ctx = document.getElementById('weeklyChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.weekly_stats.labels,
+                    datasets: [{
+                        label: 'Hadir',
+                        data: data.weekly_stats.present,
+                        borderColor: '#4CAF50',
+                        tension: 0.1
+                    }, {
+                        label: 'Terlambat',
+                        data: data.weekly_stats.late,
+                        borderColor: '#FF9800',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });            // Update most present students
+            const presentDiv = document.getElementById('mostPresent');
+            presentDiv.innerHTML = data.most_present.map(student => `
+                <div class="student-item">
+                    <span class="student-name">${student.name}</span>
+                    <span class="attendance-count">${student.attendance_count} kehadiran</span>
+                </div>
+            `).join('');
+
+            // Update most absent students
+            const absentDiv = document.getElementById('mostAbsent');
+            absentDiv.innerHTML = data.most_absent.map(student => `
+                <div class="student-item">
+                    <span class="student-name">${student.name}</span>
+                    <span class="absent-count">${student.absent_days} hari tidak hadir</span>
+                </div>
+            `).join('');
+        })
+        .catch(error => console.error('Error:', error));
+});
+</script>
+{% endblock scripts %}

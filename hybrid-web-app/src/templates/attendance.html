@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+
+{% block title %}Absensi - Sistem Absensi PKL{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="theme-toggle">
+        <button id="themeToggle" class="theme-toggle-btn">
+            <i class="fas fa-moon"></i>
+        </button>
+    </div>
+    <div class="attendance-form">
+        <h2><i class="fas fa-user-clock"></i> Form Absensi</h2>
+        <form method="POST" action="{{ url_for('attendance') }}" enctype="multipart/form-data" id="attendanceForm">
+        <div class="form-group">
+            <label for="attendance_type">
+                <i class="fas fa-clipboard-check"></i> Jenis Kehadiran:
+            </label>
+            <select id="attendance_type" name="attendance_type" required>
+                <option value="">-- Pilih Jenis Kehadiran --</option>
+                <option value="hadir">Hadir</option>
+                <option value="izin">Izin</option>
+                <option value="sakit">Sakit</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="activity">
+                <i class="fas fa-tasks"></i> Kegiatan/Keterangan:
+            </label>
+            <textarea id="activity" name="activity" rows="4" 
+                      placeholder="Tuliskan kegiatan atau keterangan absensi Anda di sini..." 
+                      required></textarea>
+        </div>
+        
+        <div class="form-group">
+            <label for="photo">
+                <i class="fas fa-camera"></i> Dokumentasi Foto:
+            </label>
+            <div class="file-upload">
+                <div class="file-input-wrapper">
+                    <div class="file-input-button">
+                        <i class="fas fa-upload"></i>
+                        <span>Pilih Foto</span>
+                    </div>
+                    <input type="file" id="photo" name="photo" accept="image/*" required>
+                </div>
+                <div class="preview-container">
+                    <img id="preview" src="#" alt="Preview Foto">
+                </div>
+            </div>
+        </div>
+        
+        <button type="submit" class="btn-primary">
+            <i class="fas fa-paper-plane"></i> Submit Absensi
+        </button>
+
+        <div class="loading">
+            <i class="fas fa-spinner fa-spin"></i> Mengirim data...
+        </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('attendanceForm');
+    const photoInput = document.getElementById('photo');
+    const preview = document.getElementById('preview');
+    const fileInputButton = document.querySelector('.file-input-button span');
+    const loading = document.querySelector('.loading');
+
+    // Handle file input change
+    photoInput.onchange = function(evt) {
+        const file = evt.target.files[0];
+        if (file) {
+            // Update button text
+            fileInputButton.textContent = file.name;
+            
+            // Show preview
+            preview.src = URL.createObjectURL(file);
+            preview.style.display = 'block';
+            
+            // Validate file size and type
+            if (file.size > 5 * 1024 * 1024) { // 5MB limit
+                alert('Ukuran file terlalu besar. Maksimal 5MB.');
+                photoInput.value = '';
+                preview.style.display = 'none';
+                fileInputButton.textContent = 'Pilih Foto';
+                return;
+            }
+            
+            if (!file.type.match('image.*')) {
+                alert('Hanya file gambar yang diperbolehkan.');
+                photoInput.value = '';
+                preview.style.display = 'none';
+                fileInputButton.textContent = 'Pilih Foto';
+                return;
+            }
+        }
+    };    // Theme toggle functionality
+    const themeToggleBtn = document.getElementById('themeToggle');
+    const htmlElement = document.documentElement;
+    
+    // Check saved theme preference or system preference
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+        htmlElement.setAttribute('data-theme', savedTheme);
+        updateThemeIcon(savedTheme);
+    } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        htmlElement.setAttribute('data-theme', 'dark');
+        updateThemeIcon('dark');
+    }
+
+    // Theme toggle handler
+    themeToggleBtn.addEventListener('click', () => {
+        const currentTheme = htmlElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        
+        htmlElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        updateThemeIcon(newTheme);
+    });
+
+    function updateThemeIcon(theme) {
+        const icon = themeToggleBtn.querySelector('i');
+        if (theme === 'dark') {
+            icon.className = 'fas fa-sun';
+        } else {
+            icon.className = 'fas fa-moon';
+        }
+    }
+
+    // Handle form submission
+    form.onsubmit = function(evt) {
+        const submitButton = form.querySelector('button[type="submit"]');
+        submitButton.disabled = true;
+        loading.classList.add('active');
+    };
+});
+</script>
+{% endblock %}
