@@ -201,8 +201,12 @@ def attendance():
         flash('Anda sudah melakukan absensi hari ini!', 'warning')
         return redirect(url_for('dashboard'))
     
-    # Pembatasan jam absen dihapus agar murid bisa absen kapan saja
-    # (kode pengecekan jam 8 pagi dihapus)
+    current_time = datetime.now().time()
+    start_time = datetime.strptime('08:00', '%H:%M').time()
+    end_time = datetime.strptime('17:00', '%H:%M').time()
+    if not (start_time <= current_time <= end_time):
+        flash('Absensi hanya dapat dilakukan antara pukul 08:00 sampai 17:00 WIB!', 'warning')
+        return redirect(url_for('dashboard'))
     
     if request.method == 'POST':
         activity = request.form.get('activity')
