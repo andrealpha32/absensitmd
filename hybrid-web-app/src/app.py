@@ -201,13 +201,8 @@ def attendance():
         flash('Anda sudah melakukan absensi hari ini!', 'warning')
         return redirect(url_for('dashboard'))
     
-    # Check if it's past 8 AM
-    current_time = datetime.now().time()
-    allowed_time = datetime.strptime('08:00', '%H:%M').time()
-    
-    if current_time < allowed_time:
-        flash('Absensi hanya dapat dilakukan mulai pukul 08:00 WIB!', 'warning')
-        return redirect(url_for('dashboard'))
+    # Pembatasan jam absen dihapus agar murid bisa absen kapan saja
+    # (kode pengecekan jam 8 pagi dihapus)
     
     if request.method == 'POST':
         activity = request.form.get('activity')
@@ -519,23 +514,23 @@ def reset_daily_attendance_counts():
         logging.error(f"Error resetting attendance counts: {str(e)}")
 
 # Add this to your main section
-if __name__ == '__main__':
-    # Schedule the daily reset at midnight
-    schedule.every().day.at("00:00").do(reset_daily_attendance_counts)
-    
-    # Run the scheduler in a separate thread
-    import threading
-    def run_scheduler():
-        while True:
-            schedule.run_pending()
-            time.sleep(60)
-    
-    scheduler_thread = threading.Thread(target=run_scheduler, daemon=True)
-    scheduler_thread.start()
-    
-    with app.app_context():
-        db.create_all()
-    app.run(debug=True, host='0.0.0.0', port=5000)
+# if __name__ == '__main__':
+#     # Schedule the daily reset at midnight
+#     schedule.every().day.at("00:00").do(reset_daily_attendance_counts)
+#     
+#     # Run the scheduler in a separate thread
+#     import threading
+#     def run_scheduler():
+#         while True:
+#             schedule.run_pending()
+#             time.sleep(60)
+#     
+#     scheduler_thread = threading.Thread(target=run_scheduler, daemon=True)
+#     scheduler_thread.start()
+#     
+#     with app.app_context():
+#         db.create_all()
+#     app.run(debug=True, host='0.0.0.0', port=5000)
 
 @app.route('/api/attendance-stats')
 def attendance_stats():
