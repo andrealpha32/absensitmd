@@ -1,0 +1,16 @@
+Flask>=2.0.0
+SQLAlchemy>=2.0.0
+Flask-SQLAlchemy>=3.0.0
+Werkzeug>=2.0.0
+requests>=2.31.0
+python-dotenv>=1.0.0
+gunicorn>=21.0.0
+schedule>=1.2.0
+Pillow>=10.0.0  # For image processing
+Flask-Login>=0.6.2  # For user authentication
+Flask-WTF>=1.1.1  # For form handling
+email-validator>=2.0.0  # For email validation
+python-dateutil>=2.8.2  # For date handling
+PyJWT>=2.8.0  # For JSON Web Tokens
+Flask-Mail>=0.9.1  # For email functionality
+Flask-Migrate>=4.0.4  # For database migrations
