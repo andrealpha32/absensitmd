@@ -10,6 +10,11 @@ import calendar
 import schedule
 import time
 
+try:
+    from zoneinfo import ZoneInfo  # Python 3.9+
+except ImportError:
+    from pytz import timezone as ZoneInfo  # fallback jika pakai pytz
+
 app = Flask(__name__)
 app.config.from_object(Config)
 app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static', 'uploads')
@@ -190,8 +195,12 @@ def attendance():
         flash('Student not found, please login again', 'warning')
         return redirect(url_for('logout'))
     
+    # Gunakan zona waktu Asia/Jakarta
+    WIB = ZoneInfo('Asia/Jakarta')
+    now_wib = datetime.now(WIB)
+    today = now_wib.date()
+    
     # Check if student has already attended today
-    today = datetime.now().date()
     existing_attendance = Attendance.query.filter_by(
         student_id=student_id,
         date=today
@@ -201,7 +210,7 @@ def attendance():
         flash('Anda sudah melakukan absensi hari ini!', 'warning')
         return redirect(url_for('dashboard'))
     
-    current_time = datetime.now().time()
+    current_time = now_wib.time()
     start_time = datetime.strptime('08:00', '%H:%M').time()
     end_time = datetime.strptime('17:00', '%H:%M').time()
     if not (start_time <= current_time <= end_time):
@@ -211,7 +220,7 @@ def attendance():
     if request.method == 'POST':
         activity = request.form.get('activity')
         attendance_type = request.form.get('attendance_type')
-        now = datetime.now()
+        now = now_wib  # gunakan waktu WIB
         
         # Handle file upload
         photo = request.files.get('photo')
