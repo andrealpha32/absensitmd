@@ -2,7 +2,7 @@ import sys
 import os
 
 # Tambahkan folder tempat app.py berada ke sys.path
-project_home = '/home/numbers1111111/absensitmd/hybrid-web-app/src'
+project_home = '/home/LebahMadu/absensitmd/hybrid-web-app/src'
 if project_home not in sys.path:
     sys.path.insert(0, project_home)
 
