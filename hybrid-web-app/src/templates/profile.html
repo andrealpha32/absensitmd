@@ -1,0 +1,1075 @@
+{% extends 'base.html' %}
+
+{% block title %}Profil - {{ student.name }}{% endblock %}
+
+{% block content %}
+<!-- Navbar khusus desktop -->
+<nav class="profile-navbar desktop-navbar">
+    <a href="{{ url_for('dashboard') }}" class="nav-link">
+        <i class="fas fa-home"></i> Dashboard
+    </a>
+    <a href="{{ url_for('profile') }}" class="nav-link{% if request.endpoint == 'profile' %} active{% endif %}">
+        <i class="fas fa-user"></i> Profil
+    </a>
+    <a href="{{ url_for('attendance') }}" class="nav-link">
+        <i class="fas fa-user-clock"></i> Absensi
+    </a>
+    <a href="{{ url_for('history') }}" class="nav-link">
+        <i class="fas fa-history"></i> Riwayat
+    </a>
+    <a href="{{ url_for('logout') }}" class="nav-link">
+        <i class="fas fa-sign-out-alt"></i> Logout
+    </a>
+</nav>
+
+<div class="profile-container">
+    <!-- Profile Header -->
+    <div class="profile-header">
+        <div class="profile-avatar-section">
+            <div class="avatar-container" onclick="openPhotoModal()">
+                {% if student.profile_picture and student.profile_picture != 'default-avatar.png' %}
+                    <img src="{{ url_for('static', filename='uploads/profiles/' + student.profile_picture) }}" 
+                         alt="Profile Picture" class="profile-avatar" id="profileAvatar">
+                {% else %}
+                    <div class="default-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                {% endif %}
+                <div class="avatar-overlay">
+                    <i class="fas fa-camera"></i>
+                    <span>Ubah Foto</span>
+                </div>
+            </div>
+            <input type="file" id="photoInput" accept="image/jpeg,image/png,image/jpg" style="display: none;">
+        </div>
+        
+        <div class="profile-info">
+            <h1>{{ student.name }}</h1>
+            <p class="email">{{ student.email }}</p>
+            <div class="profile-stats">
+                <div class="stat-item">
+                    <span class="stat-number">{{ completion_percentage }}%</span>
+                    <span class="stat-label">Profil Lengkap</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">{{ student.attendances|length }}</span>
+                    <span class="stat-label">Total Absensi</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">{{ (student.created_at.now() - student.created_at).days }}</span>
+                    <span class="stat-label">Hari Bergabung</span>
+                </div>
+            </div>
+
+            <!-- Profile Completion Progress -->
+            <div class="completion-progress">
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: {{ completion_percentage }}%"></div>
+                </div>
+                <span class="progress-text">Kelengkapan Profil: {{ completion_percentage }}%</span>
+            </div>
+        </div>
+
+        <div class="profile-actions">
+            <a href="{{ url_for('edit_profile') }}" class="btn btn-primary">
+                <i class="fas fa-edit"></i> Edit Profil
+            </a>
+            <a href="{{ url_for('change_password') }}" class="btn btn-secondary">
+                <i class="fas fa-key"></i> Ubah Password
+            </a>
+            <a href="{{ url_for('profile_settings') }}" class="btn btn-outline">
+                <i class="fas fa-cog"></i> Pengaturan
+            </a>
+        </div>
+    </div>
+
+    <!-- Profile Content -->
+    <div class="profile-content">
+        <div class="profile-grid">
+            <!-- Personal Information -->
+            <div class="profile-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-user-circle"></i> Informasi Personal</h3>
+                    <button class="btn-edit" onclick="editPersonalInfo()">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <label>Nama Lengkap</label>
+                            <span>{{ student.name or '-' }}</span>
+                        </div>
+                        <div class="info-item">
+                            <label>Email</label>
+                            <span>{{ student.email }}</span>
+                        </div>
+                        <div class="info-item">
+                            <label>Telepon</label>
+                            <span>{{ student.phone or '-' }}</span>
+                        </div>
+                        <div class="info-item">
+                            <label>Tanggal Lahir</label>
+                            <span>{{ student.birth_date.strftime('%d/%m/%Y') if student.birth_date else '-' }}</span>
+                        </div>
+                        <div class="info-item">
+                            <label>Jenis Kelamin</label>
+                            <span>{{ student.gender or '-' }}</span>
+                        </div>
+                        <div class="info-item full-width">
+                            <label>Alamat</label>
+                            <span>{{ student.address or '-' }}</span>
+                        </div>
+                        <div class="info-item full-width">
+                            <label>Bio</label>
+                            <span>{{ student.bio or '-' }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Education & Internship -->
+            <div class="profile-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-graduation-cap"></i> Pendidikan & PKL</h3>
+                    <button class="btn-edit" onclick="editEducationInfo()">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <label>Tingkat Pendidikan</label>
+                            <span>{{ student.education_level or '-' }}</span>
+                        </div>
+                        <div class="info-item">
+                            <label>Nama Sekolah</label>
+                            <span>{{ student.school_name or '-' }}</span>
+                        </div>
+                        <div class="info-item">
+                            <label>Tanggal Mulai PKL</label>
+                            <span>{{ student.internship_start_date.strftime('%d/%m/%Y') if student.internship_start_date else '-' }}</span>
+                        </div>
+                        <div class="info-item">
+                            <label>Tanggal Selesai PKL</label>
+                            <span>{{ student.internship_end_date.strftime('%d/%m/%Y') if student.internship_end_date else '-' }}</span>
+                        </div>
+                        <div class="info-item">
+                            <label>Pembimbing</label>
+                            <span>{{ student.supervisor or '-' }}</span>
+                        </div>
+                        <div class="info-item">
+                            <label>Perusahaan</label>
+                            <span>{{ student.company or 'Trimediatama' }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="profile-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-clock"></i> Aktivitas Terbaru</h3>
+                    <a href="{{ url_for('history') }}" class="btn-view-all">Lihat Semua</a>
+                </div>
+                <div class="card-body">
+                    {% if recent_attendances %}
+                        <div class="activity-list">
+                            {% for attendance in recent_attendances %}
+                            <div class="activity-item">
+                                <div class="activity-icon">
+                                    {% if attendance.status == 'hadir' %}
+                                        <i class="fas fa-user-check text-success"></i>
+                                    {% elif attendance.status == 'terlambat' %}
+                                        <i class="fas fa-user-clock text-warning"></i>
+                                    {% else %}
+                                        <i class="fas fa-user-times text-danger"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="activity-content">
+                                    <div class="activity-title">Absensi {{ attendance.attendance_type.title() }}</div>
+                                    <div class="activity-meta">
+                                        {{ attendance.date.strftime('%d/%m/%Y') }} - 
+                                        {{ attendance.time_in.strftime('%H:%M') if attendance.time_in else '-' }}
+                                    </div>
+                                    {% if attendance.activity %}
+                                        <div class="activity-desc">{{ attendance.activity[:50] }}...</div>
+                                    {% endif %}
+                                </div>
+                                <span class="activity-status status-{{ attendance.status }}">
+                                    {{ attendance.status.title() }}
+                                </span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-calendar-times"></i>
+                            <p>Belum ada aktivitas absensi</p>
+                            <a href="{{ url_for('attendance') }}" class="btn btn-primary btn-sm">
+                                Mulai Absensi
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Profile Changes Log -->
+            <div class="profile-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-history"></i> Riwayat Perubahan</h3>
+                </div>
+                <div class="card-body">
+                    {% if recent_changes %}
+                        <div class="changes-list">
+                            {% for change in recent_changes %}
+                            <div class="change-item">
+                                <div class="change-icon">
+                                    <i class="fas fa-edit"></i>
+                                </div>
+                                <div class="change-content">
+                                    <div class="change-title">{{ change.field_changed.replace('_', ' ').title() }} diubah</div>
+                                    <div class="change-meta">{{ change.changed_at.strftime('%d/%m/%Y %H:%M') }}</div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-edit"></i>
+                            <p>Belum ada perubahan profil</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Photo Upload Modal -->
+<div id="photoModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Ubah Foto Profil</h3>
+            <span class="close" onclick="closePhotoModal()">&times;</span>
+        </div>
+        <div class="modal-body">
+            <div class="photo-upload-area" id="photoUploadArea">
+                <div class="upload-placeholder">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <p>Klik untuk memilih foto atau drag & drop di sini</p>
+                    <small>Format: JPG, PNG, JPEG. Maksimal 5MB</small>
+                </div>
+                <div class="photo-preview" id="photoPreview" style="display: none;">
+                    <img id="previewImage" src="#" alt="Preview">
+                    <div class="preview-overlay">
+                        <button type="button" class="btn-remove" onclick="removePreview()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="upload-progress" id="uploadProgress" style="display: none;">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <span class="progress-text" id="progressText">0%</span>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closePhotoModal()">Batal</button>
+            <button type="button" class="btn btn-primary" id="uploadPhotoBtn" onclick="uploadPhoto()" disabled>
+                <i class="fas fa-upload"></i> Upload
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Overlay -->
+<div id="loadingOverlay" class="loading-overlay" style="display: none;">
+    <div class="loading-content">
+        <div class="spinner"></div>
+        <p>Memproses...</p>
+    </div>
+</div>
+
+<style>
+:root {
+    --primary-color: #667eea;
+    --secondary-color: #764ba2;
+    --success-color: #28a745;
+    --warning-color: #ffc107;
+    --danger-color: #dc3545;
+    --info-color: #17a2b8;
+    --light-color: #f8f9fa;
+    --dark-color: #343a40;
+    --bg-form: #ffffff;
+    --text-primary: #333333;
+    --shadow-color: rgba(0,0,0,0.1);
+    --border-radius: 12px;
+    --transition: all 0.3s ease;
+}
+
+/* Navbar Styles */
+.profile-navbar.desktop-navbar {
+    display: flex;
+    gap: 1.5rem;
+    background: var(--bg-form);
+    border-radius: var(--border-radius);
+    box-shadow: 0 2px 8px var(--shadow-color);
+    padding: 1rem 2rem;
+    margin-bottom: 2rem;
+    align-items: center;
+    justify-content: center;
+}
+
+.profile-navbar .nav-link {
+    color: var(--text-primary);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    transition: var(--transition);
+}
+
+.profile-navbar .nav-link.active,
+.profile-navbar .nav-link:hover {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: #fff;
+    transform: translateY(-2px);
+}
+
+/* Profile Container */
+.profile-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Profile Header */
+.profile-header {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    border-radius: 20px;
+    padding: 30px;
+    color: white;
+    margin-bottom: 30px;
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    flex-wrap: wrap;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.profile-avatar-section {
+    flex-shrink: 0;
+}
+
+.avatar-container {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    cursor: pointer;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 4px solid rgba(255,255,255,0.3);
+    transition: var(--transition);
+}
+
+.avatar-container:hover {
+    transform: scale(1.05);
+    border-color: rgba(255,255,255,0.6);
+}
+
+.profile-avatar {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.default-avatar {
+    width: 100%;
+    height: 100%;
+    background: rgba(255,255,255,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+}
+
+.avatar-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.7);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    font-size: 12px;
+    text-align: center;
+}
+
+.avatar-container:hover .avatar-overlay {
+    opacity: 1;
+}
+
+/* Profile Info */
+.profile-info {
+    flex: 1;
+    min-width: 300px;
+}
+
+.profile-info h1 {
+    margin: 0 0 5px 0;
+    font-size: 2.5rem;
+    font-weight: 700;
+}
+
+.email {
+    opacity: 0.9;
+    margin-bottom: 20px;
+    font-size: 1.1rem;
+}
+
+.profile-stats {
+    display: flex;
+    gap: 30px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-number {
+    display: block;
+    font-size: 1.8rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+.completion-progress {
+    margin-top: 15px;
+}
+
+.progress-bar {
+    height: 8px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 5px;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #fff, rgba(255,255,255,0.8));
+    border-radius: 4px;
+    transition: width 0.5s ease;
+}
+
+.progress-text {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+/* Profile Actions */
+.profile-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+/* Profile Content */
+.profile-content {
+    margin-top: 30px;
+}
+
+.profile-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 20px;
+}
+
+/* Profile Cards */
+.profile-card {
+    background: var(--bg-form);
+    border-radius: var(--border-radius);
+    box-shadow: 0 4px 12px var(--shadow-color);
+    overflow: hidden;
+    transition: var(--transition);
+}
+
+.profile-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px var(--shadow-color);
+}
+
+.card-header {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    padding: 20px;
+    border-bottom: 1px solid #dee2e6;
+    display: flex;
+    justify-content: between;
+    align-items: center;
+}
+
+.card-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-edit, .btn-view-all {
+    background: none;
+    border: none;
+    color: var(--primary-color);
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: 5px 10px;
+    border-radius: 5px;
+    transition: var(--transition);
+    text-decoration: none;
+}
+
+.btn-edit:hover, .btn-view-all:hover {
+    background: var(--primary-color);
+    color: white;
+}
+
+.card-body {
+    padding: 20px;
+}
+
+/* Info Grid */
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.info-item.full-width {
+    grid-column: 1 / -1;
+}
+
+.info-item label {
+    font-weight: 600;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.info-item span {
+    color: var(--text-primary);
+    word-break: break-word;
+}
+
+/* Activity List */
+.activity-list, .changes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.activity-item, .change-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    transition: var(--transition);
+}
+
+.activity-item:hover, .change-item:hover {
+    background: #e9ecef;
+}
+
+.activity-icon, .change-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.activity-content, .change-content {
+    flex: 1;
+}
+
+.activity-title, .change-title {
+    font-weight: 600;
+    margin-bottom: 3px;
+}
+
+.activity-meta, .change-meta {
+    font-size: 0.8rem;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.activity-desc {
+    font-size: 0.9rem;
+    color: #777;
+}
+
+.activity-status {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.status-hadir { background: #d4edda; color: var(--success-color); }
+.status-terlambat { background: #fff3cd; color: var(--warning-color); }
+.status-tidak-hadir { background: #f8d7da; color: var(--danger-color); }
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #666;
+}
+
+.empty-state i {
+    font-size: 3rem;
+    margin-bottom: 15px;
+    opacity: 0.5;
+}
+
+.empty-state p {
+    margin-bottom: 15px;
+}
+
+/* Buttons */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 0.9rem;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
+    transform: translateY(-2px);
+}
+
+.btn-outline {
+    background: transparent;
+    border: 2px solid rgba(255,255,255,0.3);
+    color: white;
+}
+
+.btn-outline:hover {
+    background: rgba(255,255,255,0.1);
+    border-color: rgba(255,255,255,0.5);
+}
+
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    backdrop-filter: blur(5px);
+}
+
+.modal-content {
+    background-color: white;
+    margin: 5% auto;
+    border-radius: var(--border-radius);
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    animation: modalSlideIn 0.3s ease;
+}
+
+@keyframes modalSlideIn {
+    from { transform: translateY(-50px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.modal-header {
+    padding: 20px;
+    border-bottom: 1px solid #dee2e6;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 1.3rem;
+}
+
+.close {
+    color: #aaa;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.close:hover {
+    color: #000;
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.modal-footer {
+    padding: 20px;
+    border-top: 1px solid #dee2e6;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+/* Photo Upload */
+.photo-upload-area {
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+    padding: 40px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition);
+    margin-bottom: 20px;
+}
+
+.photo-upload-area:hover {
+    border-color: var(--primary-color);
+    background: #f8f9ff;
+}
+
+.upload-placeholder i {
+    font-size: 3rem;
+    color: var(--primary-color);
+    margin-bottom: 15px;
+}
+
+.upload-placeholder p {
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+.upload-placeholder small {
+    color: #666;
+}
+
+.photo-preview {
+    position: relative;
+    max-width: 200px;
+    margin: 0 auto;
+}
+
+.photo-preview img {
+    width: 100%;
+    border-radius: 8px;
+}
+
+.preview-overlay {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+}
+
+.btn-remove {
+    background: var(--danger-color);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.upload-progress {
+    margin-top: 15px;
+}
+
+.upload-progress .progress-bar {
+    background: #e9ecef;
+    margin-bottom: 5px;
+}
+
+.upload-progress .progress-fill {
+    background: var(--primary-color);
+}
+
+/* Loading Overlay */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.7);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.loading-content {
+    text-align: center;
+    color: white;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(255,255,255,0.3);
+    border-top: 4px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 15px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Utility Classes */
+.text-success { color: var(--success-color) !important; }
+.text-warning { color: var(--warning-color) !important; }
+.text-danger { color: var(--danger-color) !important; }
+
+/* Responsive */
+@media (max-width: 900px) {
+    .profile-navbar.desktop-navbar {
+        display: none;
+    }
+    
+    .profile-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 20px;
+    }
+    
+    .profile-stats {
+        justify-content: center;
+    }
+    
+    .profile-actions {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .profile-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .profile-header {
+        padding: 20px;
+    }
+    
+    .profile-info h1 {
+        font-size: 2rem;
+    }
+    
+    .email {
+        font-size: 1rem;
+    }
+    
+    .stat-number {
+        font-size: 1.5rem;
+    }
+    
+    .btn {
+        padding: 8px 16px;
+        font-size: 0.85rem;
+    }
+    
+    .modal-content {
+        width: 95%;
+    }
+}
+</style>
+
+<script>
+// Modal logic
+function openPhotoModal() {
+    document.getElementById('photoModal').style.display = 'block';
+}
+function closePhotoModal() {
+    document.getElementById('photoModal').style.display = 'none';
+    removePreview();
+}
+
+// File input & preview
+const photoInput = document.getElementById('photoInput');
+const photoUploadArea = document.getElementById('photoUploadArea');
+const photoPreview = document.getElementById('photoPreview');
+const previewImage = document.getElementById('previewImage');
+const uploadPhotoBtn = document.getElementById('uploadPhotoBtn');
+const uploadProgress = document.getElementById('uploadProgress');
+const progressFill = document.getElementById('progressFill');
+const progressText = document.getElementById('progressText');
+
+photoUploadArea.onclick = () => photoInput.click();
+photoInput.onchange = handleFileSelect;
+
+photoUploadArea.ondragover = (e) => {
+    e.preventDefault();
+    photoUploadArea.classList.add('dragover');
+};
+photoUploadArea.ondragleave = (e) => {
+    e.preventDefault();
+    photoUploadArea.classList.remove('dragover');
+};
+photoUploadArea.ondrop = (e) => {
+    e.preventDefault();
+    photoUploadArea.classList.remove('dragover');
+    if (e.dataTransfer.files.length) {
+        photoInput.files = e.dataTransfer.files;
+        handleFileSelect();
+    }
+};
+
+function handleFileSelect() {
+    const file = photoInput.files[0];
+    if (!file) return;
+    if (!['image/jpeg', 'image/png', 'image/jpg'].includes(file.type)) {
+        alert('Format file tidak didukung!');
+        removePreview();
+        return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+        alert('Ukuran file maksimal 5MB!');
+        removePreview();
+        return;
+    }
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        previewImage.src = e.target.result;
+        photoPreview.style.display = 'block';
+        uploadPhotoBtn.disabled = false;
+    };
+    reader.readAsDataURL(file);
+}
+
+function removePreview() {
+    previewImage.src = '#';
+    photoPreview.style.display = 'none';
+    photoInput.value = '';
+    uploadPhotoBtn.disabled = true;
+}
+
+function uploadPhoto() {
+    const file = photoInput.files[0];
+    if (!file) return;
+    uploadPhotoBtn.disabled = true;
+    uploadProgress.style.display = 'block';
+    progressFill.style.width = '0%';
+    progressText.textContent = '0%';
+    document.getElementById('loadingOverlay').style.display = 'flex';
+
+    const formData = new FormData();
+    formData.append('photo', file);
+
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', '{{ url_for('upload_profile_photo') }}', true);
+    xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+    xhr.upload.onprogress = function(e) {
+        if (e.lengthComputable) {
+            const percent = Math.round((e.loaded / e.total) * 100);
+            progressFill.style.width = percent + '%';
+            progressText.textContent = percent + '%';
+        }
+    };
+    xhr.onload = function() {
+        document.getElementById('loadingOverlay').style.display = 'none';
+        if (xhr.status === 200) {
+            // Success: reload page to show new photo
+            location.reload();
+        } else {
+            alert('Gagal upload foto. Pastikan format dan ukuran benar.');
+            uploadPhotoBtn.disabled = false;
+        }
+    };
+    xhr.onerror = function() {
+        document.getElementById('loadingOverlay').style.display = 'none';
+        alert('Terjadi kesalahan saat upload.');
+        uploadPhotoBtn.disabled = false;
+    };
+    xhr.send(formData);
+}
+</script>
+
+{% endblock %}

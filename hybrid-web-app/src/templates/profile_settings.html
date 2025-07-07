@@ -1,0 +1,662 @@
+{% extends 'base.html' %}
+
+{% block title %}Pengaturan Profil - {{ student.name }}{% endblock %}
+
+{% block content %}
+<!-- Navbar khusus desktop -->
+<nav class="profile-navbar desktop-navbar">
+    <a href="{{ url_for('dashboard') }}" class="nav-link"><i class="fas fa-home"></i> Dashboard</a>
+    <a href="{{ url_for('profile') }}" class="nav-link"><i class="fas fa-user"></i> Profil</a>
+    <a href="{{ url_for('attendance') }}" class="nav-link"><i class="fas fa-user-clock"></i> Absensi</a>
+    <a href="{{ url_for('history') }}" class="nav-link"><i class="fas fa-history"></i> Riwayat</a>
+    <a href="{{ url_for('logout') }}" class="nav-link"><i class="fas fa-sign-out-alt"></i> Logout</a>
+</nav>
+
+<style>
+/* Navbar desktop hanya tampil di layar lebar */
+.profile-navbar.desktop-navbar {
+    display: flex;
+    gap: 1.5rem;
+    background: var(--bg-form);
+    border-radius: 12px;
+    box-shadow: 0 2px 8px var(--shadow-color);
+    padding: 1rem 2rem;
+    margin-bottom: 2rem;
+    align-items: center;
+    justify-content: center;
+}
+.profile-navbar .nav-link {
+    color: var(--text-primary);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    transition: background 0.2s, color 0.2s;
+}
+.profile-navbar .nav-link.active,
+.profile-navbar .nav-link:hover {
+    background: var(--accent-primary);
+    color: #fff;
+}
+@media (max-width: 900px) {
+    .profile-navbar.desktop-navbar {
+        display: none;
+    }
+}
+
+/* Settings Container */
+.settings-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.settings-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.settings-header h1 {
+    color: var(--text-primary);
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.settings-header p {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+}
+
+/* Settings Form */
+.settings-form {
+    background: var(--bg-form);
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 10px 30px var(--shadow-color);
+}
+
+.settings-section {
+    margin-bottom: 40px;
+    padding-bottom: 30px;
+    border-bottom: 1px solid var(--bg-secondary);
+}
+
+.settings-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    color: var(--text-primary);
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
+.section-title i {
+    color: var(--accent-primary);
+}
+
+.setting-item {
+    margin-bottom: 20px;
+}
+
+.setting-item:last-child {
+    margin-bottom: 0;
+}
+
+.setting-label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+    font-weight: 500;
+    font-size: 1rem;
+}
+
+.setting-description {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 12px;
+    line-height: 1.4;
+}
+
+/* Custom Toggle Switch */
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .toggle-slider {
+    background-color: var(--accent-primary);
+}
+
+input:focus + .toggle-slider {
+    box-shadow: 0 0 1px var(--accent-primary);
+}
+
+input:checked + .toggle-slider:before {
+    transform: translateX(26px);
+}
+
+/* Theme Selection */
+.theme-options {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.theme-option {
+    position: relative;
+    flex: 1;
+    min-width: 150px;
+}
+
+.theme-option input[type="radio"] {
+    display: none;
+}
+
+.theme-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 15px;
+    border: 2px solid var(--bg-secondary);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: var(--bg-primary);
+}
+
+.theme-card:hover {
+    border-color: var(--accent-primary);
+    transform: translateY(-2px);
+}
+
+.theme-option input[type="radio"]:checked + .theme-card {
+    border-color: var(--accent-primary);
+    background: rgba(102, 126, 234, 0.1);
+}
+
+.theme-preview {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    position: relative;
+    overflow: hidden;
+}
+
+.theme-preview.light {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.theme-preview.dark {
+    background: linear-gradient(135deg, #343a40 0%, #212529 100%);
+}
+
+.theme-preview.auto {
+    background: linear-gradient(135deg, #f8f9fa 0%, #f8f9fa 50%, #343a40 50%, #343a40 100%);
+}
+
+.theme-info h4 {
+    margin: 0 0 4px 0;
+    color: var(--text-primary);
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.theme-info p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+/* Language Selection */
+.language-select {
+    position: relative;
+}
+
+.language-select select {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid var(--bg-secondary);
+    border-radius: 12px;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+    appearance: none;
+    cursor: pointer;
+}
+
+.language-select select:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+}
+
+.language-select::after {
+    content: '\f107';
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+    pointer-events: none;
+}
+
+/* Privacy & Security */
+.privacy-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid var(--bg-secondary);
+}
+
+.privacy-item:last-child {
+    border-bottom: none;
+}
+
+.privacy-info h4 {
+    margin: 0 0 4px 0;
+    color: var(--text-primary);
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.privacy-info p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+/* Action Buttons */
+.settings-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 40px;
+    flex-wrap: wrap;
+}
+
+.btn {
+    padding: 12px 30px;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 140px;
+    justify-content: center;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
+.btn-secondary {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 2px solid var(--bg-secondary);
+}
+
+.btn-secondary:hover {
+    background: transparent;
+    border-color: var(--text-primary);
+}
+
+.btn-outline {
+    background: transparent;
+    color: var(--text-primary);
+    border: 2px solid var(--bg-secondary);
+}
+
+.btn-outline:hover {
+    background: var(--bg-secondary);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .settings-container {
+        padding: 15px;
+    }
+    
+    .settings-form {
+        padding: 25px;
+    }
+    
+    .settings-header h1 {
+        font-size: 2rem;
+    }
+    
+    .theme-options {
+        flex-direction: column;
+    }
+    
+    .theme-option {
+        min-width: auto;
+    }
+    
+    .settings-actions {
+        flex-direction: column;
+    }
+    
+    .btn {
+        width: 100%;
+    }
+}
+
+/* Alert Styles */
+.alert {
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border-left: 4px solid;
+}
+
+.alert-success {
+    background: rgba(40, 167, 69, 0.1);
+    border-left-color: #28a745;
+    color: #155724;
+}
+
+.alert-error {
+    background: rgba(220, 53, 69, 0.1);
+    border-left-color: #dc3545;
+    color: #721c24;
+}
+
+.alert-warning {
+    background: rgba(255, 193, 7, 0.1);
+    border-left-color: #ffc107;
+    color: #856404;
+}
+
+.alert-info {
+    background: rgba(23, 162, 184, 0.1);
+    border-left-color: #17a2b8;
+    color: #0c5460;
+}
+</style>
+
+<div class="settings-container">
+    <!-- Settings Header -->
+    <div class="settings-header">
+        <h1><i class="fas fa-cog"></i> Pengaturan Profil</h1>
+        <p>Kelola preferensi dan pengaturan akun Anda</p>
+    </div>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ 'error' if category == 'error' else category }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- Settings Form -->
+    <form method="POST" class="settings-form">
+        <!-- Notification Settings -->
+        <div class="settings-section">
+            <h3 class="section-title">
+                <i class="fas fa-bell"></i>
+                Notifikasi
+            </h3>
+            
+            <div class="setting-item">
+                <label class="setting-label">Notifikasi Email</label>
+                <p class="setting-description">
+                    Terima notifikasi tentang absensi, pengumuman, dan update penting lainnya
+                </p>
+                <label class="toggle-switch">
+                    <input type="checkbox" name="notification_enabled" 
+                           {% if student.notification_enabled %}checked{% endif %}>
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Appearance Settings -->
+        <div class="settings-section">
+            <h3 class="section-title">
+                <i class="fas fa-palette"></i>
+                Tampilan
+            </h3>
+            
+            <div class="setting-item">
+                <label class="setting-label">Tema</label>
+                <p class="setting-description">
+                    Pilih tema yang sesuai dengan preferensi Anda
+                </p>
+                <div class="theme-options">
+                    <div class="theme-option">
+                        <input type="radio" name="theme_preference" value="light" id="theme-light"
+                               {% if student.theme_preference == 'light' or not student.theme_preference %}checked{% endif %}>
+                        <label for="theme-light" class="theme-card">
+                            <div class="theme-preview light"></div>
+                            <div class="theme-info">
+                                <h4>Terang</h4>
+                                <p>Tema klasik dengan warna terang</p>
+                            </div>
+                        </label>
+                    </div>
+                    
+                    <div class="theme-option">
+                        <input type="radio" name="theme_preference" value="dark" id="theme-dark"
+                               {% if student.theme_preference == 'dark' %}checked{% endif %}>
+                        <label for="theme-dark" class="theme-card">
+                            <div class="theme-preview dark"></div>
+                            <div class="theme-info">
+                                <h4>Gelap</h4>
+                                <p>Tema gelap yang nyaman untuk mata</p>
+                            </div>
+                        </label>
+                    </div>
+                    
+                    <div class="theme-option">
+                        <input type="radio" name="theme_preference" value="auto" id="theme-auto"
+                               {% if student.theme_preference == 'auto' %}checked{% endif %}>
+                        <label for="theme-auto" class="theme-card">
+                            <div class="theme-preview auto"></div>
+                            <div class="theme-info">
+                                <h4>Otomatis</h4>
+                                <p>Mengikuti pengaturan sistem</p>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Language Settings -->
+        <div class="settings-section">
+            <h3 class="section-title">
+                <i class="fas fa-language"></i>
+                Bahasa
+            </h3>
+            
+            <div class="setting-item">
+                <label class="setting-label">Bahasa Interface</label>
+                <p class="setting-description">
+                    Pilih bahasa yang akan digunakan dalam aplikasi
+                </p>
+                <div class="language-select">
+                    <select name="language" disabled>
+                        <option value="id" selected>Bahasa Indonesia</option>
+                        <option value="en">English (Coming Soon)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Privacy & Security -->
+        <div class="settings-section">
+            <h3 class="section-title">
+                <i class="fas fa-shield-alt"></i>
+                Privasi & Keamanan
+            </h3>
+            
+            <div class="privacy-item">
+                <div class="privacy-info">
+                    <h4>Visibilitas Profil</h4>
+                    <p>Profil Anda hanya dapat dilihat oleh admin dan supervisor</p>
+                </div>
+                <span class="privacy-status">
+                    <i class="fas fa-lock" style="color: var(--accent-primary);"></i>
+                    Privat
+                </span>
+            </div>
+            
+            <div class="privacy-item">
+                <div class="privacy-info">
+                    <h4>Data Absensi</h4>
+                    <p>Data absensi Anda tersimpan dengan aman dan terenkripsi</p>
+                </div>
+                <span class="privacy-status">
+                    <i class="fas fa-check-circle" style="color: #28a745;"></i>
+                    Aman
+                </span>
+            </div>
+            
+            <div class="privacy-item">
+                <div class="privacy-info">
+                    <h4>Foto Profil</h4>
+                    <p>Foto profil hanya dapat dilihat oleh pengguna yang berwenang</p>
+                </div>
+                <span class="privacy-status">
+                    <i class="fas fa-eye-slash" style="color: var(--text-secondary);"></i>
+                    Terbatas
+                </span>
+            </div>
+        </div>
+
+        <!-- Account Information -->
+        <div class="settings-section">
+            <h3 class="section-title">
+                <i class="fas fa-info-circle"></i>
+                Informasi Akun
+            </h3>
+            
+            <div class="setting-item">
+                <div class="info-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div>
+                        <label class="setting-label">Email</label>
+                        <p style="color: var(--text-secondary); margin: 0;">{{ student.email }}</p>
+                    </div>
+                    <div>
+                        <label class="setting-label">Bergabung Sejak</label>
+                        <p style="color: var(--text-secondary); margin: 0;">
+                            {{ student.created_at.strftime('%d/%m/%Y') if student.created_at else '-' }}
+                        </p>
+                    </div>
+                    <div>
+                        <label class="setting-label">Terakhir Diperbarui</label>
+                        <p style="color: var(--text-secondary); margin: 0;">
+                            {{ student.updated_at.strftime('%d/%m/%Y %H:%M') if student.updated_at else '-' }}
+                        </p>
+                    </div>
+                    <div>
+                        <label class="setting-label">Status Akun</label>
+                        <p style="color: #28a745; margin: 0; font-weight: 600;">
+                            <i class="fas fa-check-circle"></i> Aktif
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="settings-actions">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i>
+                Simpan Pengaturan
+            </button>
+            <a href="{{ url_for('profile') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i>
+                Kembali ke Profil
+            </a>
+            <a href="{{ url_for('change_password') }}" class="btn btn-outline">
+                <i class="fas fa-key"></i>
+                Ubah Password
+            </a>
+        </div>
+    </form>
+</div>
+
+<script>
+// Theme preview functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const themeOptions = document.querySelectorAll('input[name="theme_preference"]');
+    
+    themeOptions.forEach(option => {
+        option.addEventListener('change', function() {
+            // Here you could add preview functionality
+            console.log('Theme changed to:', this.value);
+        });
+    });
+    
+    // Form validation
+    const form = document.querySelector('.settings-form');
+    form.addEventListener('submit', function(e) {
+        // Add any client-side validation here
+        console.log('Settings form submitted');
+    });
+});
+</script>
+
+{% endblock %}

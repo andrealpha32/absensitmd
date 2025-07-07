@@ -1,0 +1,35 @@
+{% extends 'admin/base.html' %}
+{% block title %}Rekap Absensi Bulanan{% endblock %}
+{% block content %}
+<div class="rekap-table-section">
+    <h2>Rekap Absensi Bulan {{ month }}/{{ year }}</h2>
+    <div style="margin-bottom:1rem;">
+        <a href="/admin/rekap/{{ year }}/{{ month }}" class="btn btn-success"><i class="fas fa-download"></i> Download CSV</a>
+        <a href="/admin/dashboard?year={{ year }}&month={{ month }}" class="btn btn-secondary">Kembali ke Dashboard</a>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Nama</th>
+                    <th>Email</th>
+                    {% for day in days %}
+                    <th>{{ day }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in table_data %}
+                <tr>
+                    <td>{{ row.name }}</td>
+                    <td>{{ row.email }}</td>
+                    {% for status in row.statuses %}
+                    <td>{{ status }}</td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

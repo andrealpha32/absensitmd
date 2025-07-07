@@ -3,18 +3,26 @@
     --header-height: 60px; 
     --bottom-nav-height: 65px;
     --content-padding: 1rem;
+    
+    /* Platform-specific variables */
+    --ios-safe-area-top: env(safe-area-inset-top);
+    --ios-safe-area-bottom: env(safe-area-inset-bottom);
+    --android-status-bar: 24px;
 }
 
 /* Base mobile styles */
 html {
     font-size: 16px;
     -webkit-text-size-adjust: 100%;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 body {
     padding-bottom: calc(var(--bottom-nav-height) + 1rem);
     overflow-x: hidden;
     background: var(--bg-main);
+    -webkit-tap-highlight-color: transparent;
 }
 
 /* Header & Navigation */
@@ -74,6 +82,9 @@ body {
     margin: 0 0.25rem;
     background-color: var(--nav-bg);
     border: 1px solid rgba(var(--accent-rgb), 0.2);
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 .nav-link:active {
@@ -95,6 +106,7 @@ body {
     font-size: 1.6rem;
     margin-bottom: 0.4rem;
     color: currentColor;
+    transition: transform 0.2s ease;
 }
 
 .nav-link:active i {
@@ -127,6 +139,9 @@ body {
     font-size: 16px;
     background: var(--input-bg);
     color: var(--text-primary);
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
 }
 
 /* Improved Buttons */
@@ -141,6 +156,13 @@ body {
     font-weight: 500;
     margin-top: 1rem;
     cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: all 0.2s ease;
+}
+
+.btn-primary:active {
+    transform: scale(0.98);
+    opacity: 0.9;
 }
 
 /* Tables Responsive */
@@ -157,13 +179,161 @@ body {
     color: var(--text-secondary);
 }
 
-/* Fixes for iOS devices */
-input,
-select,
-textarea {
-    -webkit-appearance: none;
-    border-radius: 8px;
+/* ===========================================
+   iOS SPECIFIC STYLES
+   =========================================== */
+
+/* iOS Detection - Safari specific */
+@supports (-webkit-appearance: none) and (not (overflow: -webkit-marquee)) and (not (-ms-ime-align: auto)) {
+    
+    /* iOS Safe Area Support */
+    body {
+        padding-top: var(--ios-safe-area-top);
+        padding-bottom: calc(var(--bottom-nav-height) + var(--ios-safe-area-bottom) + 1rem);
+    }
+    
+    .header {
+        top: var(--ios-safe-area-top);
+        padding-top: 0;
+    }
+    
+    .nav-menu {
+        bottom: var(--ios-safe-area-bottom);
+        padding-bottom: calc(0.5rem + var(--ios-safe-area-bottom));
+    }
+    
+    /* iOS haptic feedback simulation */
+    .nav-link:active {
+        transition: all 0.1s ease;
+        transform: scale(0.95);
+    }
+    
+    /* iOS-style smooth scrolling */
+    * {
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* iOS form improvements */
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        -webkit-appearance: none;
+        border-radius: 10px;
+        font-size: 16px; 
+    }
+    
+    /* iOS button styles */
+    .btn-primary {
+        border-radius: 10px;
+        -webkit-appearance: none;
+        background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary, var(--accent-primary)));
+    }
+    
+    .btn-primary:active {
+        transform: scale(0.97);
+    }
 }
+
+/* iOS iPhone X and newer (with notch) */
+@supports (padding: max(0px)) {
+    .header {
+        padding-top: max(var(--ios-safe-area-top), 0px);
+        top: 0;
+    }
+    
+    .nav-menu {
+        padding-bottom: max(calc(0.5rem + var(--ios-safe-area-bottom)), 0.5rem);
+    }
+    
+    body {
+        padding-bottom: max(calc(var(--bottom-nav-height) + var(--ios-safe-area-bottom) + 1rem), calc(var(--bottom-nav-height) + 1rem));
+    }
+}
+
+/* ===========================================
+   ANDROID SPECIFIC STYLES
+   =========================================== */
+
+/* Android Detection - Chrome/WebView specific */
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+    @supports not (-webkit-appearance: none) {
+        
+        /* Android status bar compensation */
+        .header {
+            top: 0;
+            padding-top: 0;
+        }
+        
+        body {
+            padding-top: 0;
+        }
+        
+        /* Android Material Design elements */
+        .nav-link {
+            border-radius: 8px;
+            transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+        
+        .nav-link:active {
+            transform: scale(0.96);
+            transition: all 0.1s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+        
+        /* Android ripple effect simulation */
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s ease, height 0.3s ease;
+            pointer-events: none;
+        }
+        
+        .nav-link:active::after {
+            width: 100px;
+            height: 100px;
+        }
+        
+        /* Android form styles */
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            border-radius: 4px;
+            border: 2px solid var(--border-color);
+            transition: border-color 0.2s ease;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: var(--accent-primary);
+            outline: none;
+        }
+        
+        /* Android button styles */
+        .btn-primary {
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+        
+        .btn-primary:active {
+            transform: translateY(1px);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+    }
+}
+
+/* ===========================================
+   RESPONSIVE BREAKPOINTS
+   =========================================== */
 
 @media (max-width: 360px) {
     html {
@@ -175,5 +345,98 @@ textarea {
     .dashboard-card {
         margin: 0.75rem;
         padding: 1rem;
+    }
+    
+    .nav-link {
+        font-size: 0.75rem;
+        padding: 0.8rem 0.6rem;
+    }
+    
+    .nav-link i {
+        font-size: 1.4rem;
+    }
+}
+
+@media (min-width: 768px) {
+    .nav-menu {
+        position: static !important;
+        bottom: unset;
+        left: unset;
+        right: unset;
+        height: auto !important;
+        background: none !important;
+        box-shadow: none !important;
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center;
+        justify-content: flex-end;
+        visibility: visible !important;
+        opacity: 1 !important;
+        transform: none !important;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .nav-link {
+        padding: 0.5rem 1rem;
+        font-size: 1rem;
+        color: var(--nav-text);
+        background: none;
+        border-radius: 8px;
+        transition: background 0.2s, color 0.2s;
+        border: none;
+        margin: 0 0.25rem;
+    }
+    
+    .nav-link.active,
+    .nav-link:hover {
+        background: var(--accent-primary);
+        color: #fff;
+    }
+    
+    .nav-link::after {
+        display: none;
+    }
+    
+    .mobile-menu-btn {
+        display: none !important;
+    }
+    
+    /* Remove iOS/Android specific styles on desktop */
+    body {
+        padding-top: 0;
+        padding-bottom: 1rem;
+    }
+    
+    .header {
+        top: 0;
+        padding-top: 0;
+    }
+}
+
+/* ===========================================
+   HIGH DPI DISPLAYS
+   =========================================== */
+
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .nav-menu {
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+    }
+    
+    .header {
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+    }
+}
+
+/* ===========================================
+   DARK MODE SUPPORT
+   =========================================== */
+
+@media (prefers-color-scheme: dark) {
+    /* Dark mode specific adjustments can be added here */
+    .nav-link::after {
+        background: rgba(255, 255, 255, 0.1);
     }
 }

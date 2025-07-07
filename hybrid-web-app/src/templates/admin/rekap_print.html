@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rekap Absensi {{ month_name }} {{ year }}</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        
+        .header p {
+            margin: 5px 0 0 0;
+            opacity: 0.9;
+        }
+        
+        .controls {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .table-container {
+            overflow-x: auto;
+            padding: 20px;
+        }
+        
+        .rekap-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            font-size: 12px;
+        }
+        
+        .rekap-table th,
+        .rekap-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        
+        .rekap-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .rekap-table th.student-info {
+            background: #343a40;
+            color: white;
+        }
+        
+        .rekap-table td.student-name {
+            text-align: left;
+            font-weight: 500;
+            background: #f8f9fa;
+            white-space: nowrap;
+            min-width: 150px;
+        }
+        
+        .rekap-table td.student-email {
+            text-align: left;
+            background: #f8f9fa;
+            font-size: 11px;
+            color: #666;
+            min-width: 200px;
+        }
+        
+        .status-hadir {
+            background: #d4edda !important;
+            color: #155724;
+            font-weight: bold;
+        }
+        
+        .status-sakit {
+            background: #fff3cd !important;
+            color: #856404;
+            font-weight: bold;
+        }
+        
+        .status-izin {
+            background: #cce5ff !important;
+            color: #004085;
+            font-weight: bold;
+        }
+        
+        .status-tidak_hadir {
+            background: #f8d7da !important;
+            color: #721c24;
+            font-weight: bold;
+        }
+        
+        .summary-cell {
+            background: #e9ecef !important;
+            font-weight: bold;
+        }
+        
+        .legend {
+            margin: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            border-left: 4px solid #007bff;
+        }
+        
+        .legend h4 {
+            margin: 0 0 10px 0;
+            color: #495057;
+        }
+        
+        .legend-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .legend-box {
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+            border: 1px solid #ddd;
+        }
+        
+        .stats {
+            padding: 20px;
+            background: #f8f9fa;
+            border-top: 1px solid #eee;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+        }
+        
+        .stat-label {
+            color: #6c757d;
+            font-size: 14px;
+        }
+        
+        @media (max-width: 768px) {
+            .rekap-table {
+                font-size: 10px;
+            }
+            
+            .rekap-table th,
+            .rekap-table td {
+                padding: 4px;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .btn {
+                justify-content: center;
+            }
+        }
+        
+        .print-only {
+            display: none;
+        }
+        
+        @media print {
+            .controls, .btn {
+                display: none !important;
+            }
+            
+            .print-only {
+                display: block;
+            }
+            
+            .container {
+                box-shadow: none;
+            }
+            
+            .rekap-table {
+                font-size: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-calendar-alt"></i> Rekap Absensi Siswa PKL</h1>
+            <p>{{ month_name }} {{ year }}</p>
+        </div>
+        
+        <div class="controls">
+            <div>
+                <a href="{{ url_for('admin_view_rekap', year=prev_year, month=prev_month) }}" class="btn btn-secondary" title="Bulan Sebelumnya">
+                    <i class="fas fa-chevron-left"></i> {{ prev_month_name }} {{ prev_year }}
+                </a>
+                <a href="{{ url_for('admin_view_rekap', year=next_year, month=next_month) }}" class="btn btn-secondary" title="Bulan Berikutnya">
+                    {{ next_month_name }} {{ next_year }} <i class="fas fa-chevron-right"></i>
+                </a>
+                <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Kembali
+                </a>
+                <button onclick="window.print()" class="btn btn-primary">
+                    <i class="fas fa-print"></i> Cetak
+                </button>
+            </div>
+            <div>
+                <a href="{{ url_for('admin_download_rekap_csv', year=year, month=month) }}" class="btn btn-success">
+                    <i class="fas fa-file-csv"></i> Download CSV
+                </a>
+                <a href="{{ url_for('admin_download_rekap', year=year, month=month) }}" class="btn btn-success">
+                    <i class="fas fa-file-excel"></i> Download Excel
+                </a>
+            </div>
+        </div>
+        
+        <div class="table-container">
+            <table class="rekap-table">
+                <thead>
+                    <tr>
+                        <th rowspan="2" class="student-info">No</th>
+                        <th rowspan="2" class="student-info">Nama Siswa</th>
+                        <th rowspan="2" class="student-info">Email</th>
+                        <th colspan="{{ days|length }}">Tanggal</th>
+                        <th colspan="4">Ringkasan</th>
+                    </tr>
+                    <tr>
+                        {% for day in days %}
+                        <th>{{ day }}</th>
+                        {% endfor %}
+                        <th style="background: #d4edda;">H</th>
+                        <th style="background: #fff3cd;">S</th>
+                        <th style="background: #cce5ff;">I</th>
+                        <th style="background: #f8d7da;">T</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in table_data %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td class="student-name">{{ student.name }}</td>
+                        <td class="student-email">{{ student.email }}</td>
+                        {% for status in student.statuses %}
+                        <td class="status-{{ status.css_class }}">
+                            {% if status.status == 'Hadir' %}H
+                            {% elif status.status == 'Sakit' %}S
+                            {% elif status.status == 'Izin' %}I
+                            {% else %}T
+                            {% endif %}
+                        </td>
+                        {% endfor %}
+                        <td class="summary-cell">{{ student.summary.hadir }}</td>
+                        <td class="summary-cell">{{ student.summary.sakit }}</td>
+                        <td class="summary-cell">{{ student.summary.izin }}</td>
+                        <td class="summary-cell">{{ student.summary.tidak_hadir }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="legend">
+            <h4><i class="fas fa-info-circle"></i> Keterangan</h4>
+            <div class="legend-items">
+                <div class="legend-item">
+                    <div class="legend-box status-hadir"></div>
+                    <span>H = Hadir</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-box status-sakit"></div>
+                    <span>S = Sakit</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-box status-izin"></div>
+                    <span>I = Izin</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-box status-tidak_hadir"></div>
+                    <span>T = Tidak Hadir</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="stats">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">{{ table_data|length }}</div>
+                    <div class="stat-label">Total Siswa</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">{{ days|length }}</div>
+                    <div class="stat-label">Hari Kerja</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">
+                        {% set total_hadir = table_data|sum(attribute='summary.hadir') %}
+                        {{ total_hadir }}
+                    </div>
+                    <div class="stat-label">Total Kehadiran</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">
+                        {% set total_attendance = table_data|length * days|length %}
+                        {% set attendance_rate = ((total_hadir / total_attendance) * 100)|round(1) if total_attendance > 0 else 0 %}
+                        {{ attendance_rate }}%
+                    </div>
+                    <div class="stat-label">Tingkat Kehadiran</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

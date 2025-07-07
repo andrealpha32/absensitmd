@@ -153,9 +153,13 @@
         <h3>Kalender Kehadiran</h3>
         <div class="calendar">
             <div class="calendar-header">
-                <button class="calendar-nav" onclick="prevMonth()">&lt;</button>
-                <h4 id="currentMonth">{{ current_month }}</h4>
-                <button class="calendar-nav" onclick="nextMonth()">&gt;</button>
+                <a href="{{ url_for('admin_dashboard', year=prev_year, month=prev_month) }}" class="calendar-nav-btn" title="Bulan Sebelumnya">
+                    &lt; {{ calendar.month_name[prev_month] }} {{ prev_year }}
+                </a>
+                <h4 id="currentMonth">{{ calendar.month_name[month] }} {{ year }}</h4>
+                <a href="{{ url_for('admin_dashboard', year=next_year, month=next_month) }}" class="calendar-nav-btn" title="Bulan Berikutnya">
+                    {{ calendar.month_name[next_month] }} {{ next_year }} &gt;
+                </a>
             </div>
             <div class="calendar-days">
                 <div class="day-header">Min</div>
@@ -195,6 +199,152 @@
             </div>
         </div>
     </div>
+
+    <!-- Tombol Download Rekap Bulanan -->
+    <div style="margin-bottom: 1.5rem;"></div>
+
+    <!-- REKAP ABSENSI BULANAN SECTION BARU -->
+    <div class="rekap-section" style="margin-top: 2rem;">
+        <div class="section-header">
+            <h3><i class="fas fa-chart-bar"></i> Rekap Absensi</h3>
+            <p>Download dan lihat rekap absensi bulanan dalam format yang rapi</p>
+        </div>
+        
+        <div class="rekap-controls">
+            <div class="rekap-form">
+                <div class="form-group">
+                    <label for="rekapMonth">Bulan:</label>
+                    <select id="rekapMonth" name="month" class="form-control">
+                        {% for m in range(1, 13) %}
+                        <option value="{{ m }}" {% if m == month %}selected{% endif %}>
+                            {{ calendar.month_name[m] }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="rekapYear">Tahun:</label>
+                    <select id="rekapYear" name="year" class="form-control">
+                        {% for y in range(year-2, year+2) %}
+                        <option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>&nbsp;</label>
+                    <div class="rekap-buttons">
+                        <button type="button" onclick="viewRekap()" class="btn btn-primary">
+                            <i class="fas fa-eye"></i> Lihat Rekap
+                        </button>
+                        <button type="button" onclick="downloadExcel()" class="btn btn-success">
+                            <i class="fas fa-file-excel"></i> Excel
+                        </button>
+                        <button type="button" onclick="downloadCSV()" class="btn btn-info">
+                            <i class="fas fa-file-csv"></i> CSV
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="quick-actions">
+                <h4>Aksi Cepat</h4>
+                <div class="quick-buttons">
+                    <a href="{{ url_for('admin_view_rekap', year=year, month=month) }}" 
+                       class="btn btn-outline-primary">
+                        <i class="fas fa-eye"></i> Lihat Bulan Ini
+                    </a>
+                    <a href="{{ url_for('admin_download_rekap', year=year, month=month) }}" 
+                       class="btn btn-outline-success">
+                        <i class="fas fa-download"></i> Download Bulan Ini
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+    .rekap-section {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+    .section-header h3 {
+        margin: 0 0 10px 0;
+        color: #333;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .section-header p {
+        margin: 0;
+        color: #666;
+        font-size: 14px;
+    }
+    .rekap-controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 2rem;
+        justify-content: space-between;
+        align-items: flex-start;
+    }
+    .rekap-form {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        align-items: flex-end;
+    }
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+    .rekap-buttons {
+        display: flex;
+        gap: 0.5rem;
+    }
+    .quick-actions {
+        min-width: 200px;
+    }
+    .quick-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    @media (max-width: 768px) {
+        .rekap-controls {
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .rekap-form {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .quick-actions {
+            width: 100%;
+        }
+    }
+    </style>
+    <script>
+    function viewRekap() {
+        var m = document.getElementById('rekapMonth').value;
+        var y = document.getElementById('rekapYear').value;
+        window.location.href = '/admin/rekap/view/' + y + '/' + m;
+    }
+    function downloadExcel() {
+        var m = document.getElementById('rekapMonth').value;
+        var y = document.getElementById('rekapYear').value;
+        window.location.href = '/admin/rekap/' + y + '/' + m;
+    }
+    function downloadCSV() {
+        var m = document.getElementById('rekapMonth').value;
+        var y = document.getElementById('rekapYear').value;
+        window.location.href = '/admin/rekap-csv/' + y + '/' + m;
+    }
+    </script>
 </div>
 
 <!-- Modal for Attendance Details -->

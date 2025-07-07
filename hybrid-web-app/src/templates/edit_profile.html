@@ -1,0 +1,371 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Profil - {{ student.name }}{% endblock %}
+
+{% block content %}
+<!-- Navbar khusus desktop -->
+<nav class="profile-navbar desktop-navbar">
+    <a href="{{ url_for('dashboard') }}" class="nav-link"><i class="fas fa-home"></i> Dashboard</a>
+    <a href="{{ url_for('profile') }}" class="nav-link"><i class="fas fa-user"></i> Profil</a>
+    <a href="{{ url_for('attendance') }}" class="nav-link"><i class="fas fa-user-clock"></i> Absensi</a>
+    <a href="{{ url_for('history') }}" class="nav-link"><i class="fas fa-history"></i> Riwayat</a>
+    <a href="{{ url_for('logout') }}" class="nav-link"><i class="fas fa-sign-out-alt"></i> Logout</a>
+</nav>
+
+<style>
+/* Navbar desktop hanya tampil di layar lebar */
+.profile-navbar.desktop-navbar {
+    display: flex;
+    gap: 1.5rem;
+    background: var(--bg-form);
+    border-radius: 12px;
+    box-shadow: 0 2px 8px var(--shadow-color);
+    padding: 1rem 2rem;
+    margin-bottom: 2rem;
+    align-items: center;
+    justify-content: center;
+}
+.profile-navbar .nav-link {
+    color: var(--text-primary);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    transition: background 0.2s, color 0.2s;
+}
+.profile-navbar .nav-link.active,
+.profile-navbar .nav-link:hover {
+    background: var(--accent-primary);
+    color: #fff;
+}
+@media (max-width: 900px) {
+    .profile-navbar.desktop-navbar {
+        display: none;
+    }
+}
+
+.edit-profile-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.page-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 20px;
+    padding: 30px;
+    color: white;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.page-header h1 {
+    margin: 0;
+    font-size: 2.5rem;
+    font-weight: 700;
+}
+
+.page-header p {
+    margin: 10px 0 0 0;
+    opacity: 0.9;
+    font-size: 1.1rem;
+}
+
+.edit-form-card {
+    background: var(--bg-form);
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 10px 30px var(--shadow-color);
+    margin-bottom: 30px;
+}
+
+.form-sections {
+    display: grid;
+    gap: 30px;
+}
+
+.form-section {
+    border: 1px solid var(--border-color);
+    border-radius: 15px;
+    padding: 25px;
+    background: var(--bg-primary);
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    color: var(--accent-primary);
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.form-group label {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    padding: 12px 16px;
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    font-size: 1rem;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    transition: all 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.form-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+}
+
+.btn {
+    padding: 12px 30px;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.btn-secondary {
+    background: var(--border-color);
+    color: var(--text-primary);
+}
+
+.btn-secondary:hover {
+    background: var(--text-secondary);
+    color: var(--bg-primary);
+}
+
+@media (max-width: 768px) {
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+    }
+    
+    .edit-profile-container {
+        padding: 15px;
+    }
+    
+    .edit-form-card {
+        padding: 20px;
+    }
+    
+    .form-section {
+        padding: 20px;
+    }
+}
+</style>
+
+<div class="edit-profile-container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1><i class="fas fa-user-edit"></i> Edit Profil</h1>
+        <p>Perbarui informasi profil Anda</p>
+    </div>
+
+    <!-- Edit Form -->
+    <div class="edit-form-card">
+        <form method="POST" action="{{ url_for('edit_profile') }}">
+            <div class="form-sections">
+                <!-- Personal Information Section -->
+                <div class="form-section">
+                    <div class="section-header">
+                        <i class="fas fa-user-circle"></i>
+                        <span>Informasi Personal</span>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="name">Nama Lengkap *</label>
+                            <input type="text" id="name" name="name" value="{{ student.name or '' }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Nomor Telepon</label>
+                            <input type="tel" id="phone" name="phone" value="{{ student.phone or '' }}" placeholder="08xxxxxxxxxx">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="birth_date">Tanggal Lahir</label>
+                            <input type="date" id="birth_date" name="birth_date" value="{{ student.birth_date.strftime('%Y-%m-%d') if student.birth_date else '' }}">
+                        </div>
+                        <div class="form-group">
+                            <label for="gender">Jenis Kelamin</label>
+                            <select id="gender" name="gender">
+                                <option value="">Pilih Jenis Kelamin</option>
+                                <option value="Laki-laki" {% if student.gender == 'Laki-laki' %}selected{% endif %}>Laki-laki</option>
+                                <option value="Perempuan" {% if student.gender == 'Perempuan' %}selected{% endif %}>Perempuan</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <label for="address">Alamat Lengkap</label>
+                        <textarea id="address" name="address" placeholder="Masukkan alamat lengkap Anda">{{ student.address or '' }}</textarea>
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <label for="bio">Bio/Tentang Saya</label>
+                        <textarea id="bio" name="bio" placeholder="Ceritakan sedikit tentang diri Anda">{{ student.bio or '' }}</textarea>
+                    </div>
+                </div>
+
+                <!-- Education & Internship Section -->
+                <div class="form-section">
+                    <div class="section-header">
+                        <i class="fas fa-graduation-cap"></i>
+                        <span>Pendidikan & PKL</span>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="education_level">Tingkat Pendidikan</label>
+                            <select id="education_level" name="education_level">
+                                <option value="">Pilih Tingkat Pendidikan</option>
+                                <option value="SMA/SMK" {% if student.education_level == 'SMA/SMK' %}selected{% endif %}>SMA/SMK</option>
+                                <option value="Diploma" {% if student.education_level == 'Diploma' %}selected{% endif %}>Diploma</option>
+                                <option value="S1" {% if student.education_level == 'S1' %}selected{% endif %}>S1</option>
+                                <option value="S2" {% if student.education_level == 'S2' %}selected{% endif %}>S2</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="school_name">Nama Sekolah/Universitas</label>
+                            <input type="text" id="school_name" name="school_name" value="{{ student.school_name or '' }}" placeholder="Nama institusi pendidikan">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="internship_start_date">Tanggal Mulai PKL</label>
+                            <input type="date" id="internship_start_date" name="internship_start_date" value="{{ student.internship_start_date.strftime('%Y-%m-%d') if student.internship_start_date else '' }}">
+                        </div>
+                        <div class="form-group">
+                            <label for="internship_end_date">Tanggal Selesai PKL</label>
+                            <input type="date" id="internship_end_date" name="internship_end_date" value="{{ student.internship_end_date.strftime('%Y-%m-%d') if student.internship_end_date else '' }}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Simpan Perubahan
+                </button>
+                <a href="{{ url_for('profile') }}" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Batal
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// Form validation
+document.querySelector('form').addEventListener('submit', function(e) {
+    const name = document.getElementById('name').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    
+    if (!name) {
+        e.preventDefault();
+        alert('Nama lengkap harus diisi!');
+        document.getElementById('name').focus();
+        return;
+    }
+    
+    if (phone && !/^[\d\-\+\(\)\s]+$/.test(phone)) {
+        e.preventDefault();
+        alert('Format nomor telepon tidak valid!');
+        document.getElementById('phone').focus();
+        return;
+    }
+    
+    // Validate dates
+    const startDate = document.getElementById('internship_start_date').value;
+    const endDate = document.getElementById('internship_end_date').value;
+    
+    if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
+        e.preventDefault();
+        alert('Tanggal mulai PKL tidak boleh lebih besar dari tanggal selesai!');
+        return;
+    }
+});
+
+// Auto-format phone number
+document.getElementById('phone').addEventListener('input', function(e) {
+    let value = e.target.value.replace(/\D/g, '');
+    if (value.startsWith('0')) {
+        value = value.substring(1);
+    }
+    if (value.length > 0) {
+        value = '0' + value;
+    }
+    e.target.value = value;
+});
+</script>
+{% endblock %}
