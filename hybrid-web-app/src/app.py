@@ -87,52 +87,6 @@ def login():
             
     return render_template('login.html')
 
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    if request.method == 'POST':
-        try:
-            name = request.form.get('name')
-            email = request.form.get('email')
-            password = request.form.get('password')
-            confirm_password = request.form.get('confirm_password')
-
-            # Enhanced validation
-            if not all([name, email, password, confirm_password]):
-                flash('Semua field harus diisi!', 'danger')
-                return render_template('register.html')
-
-            if len(password) < 6:
-                flash('Password harus minimal 6 karakter!', 'danger')
-                return render_template('register.html')
-
-            if Student.query.filter_by(email=email).first():
-                flash('Email sudah terdaftar!', 'danger')
-                return render_template('register.html')
-
-            if password != confirm_password:
-                flash('Password tidak cocok!', 'danger')
-                return render_template('register.html')
-
-            # Create new student
-            new_student = Student(
-                name=name,
-                email=email,
-                password=password
-            )
-            
-            db.session.add(new_student)
-            db.session.commit()
-            
-            flash('Registrasi berhasil! Silakan login.', 'success')
-            return redirect(url_for('login'))
-            
-        except Exception as e:
-            db.session.rollback()
-            print(f"Error during registration: {str(e)}")
-            flash('Terjadi kesalahan saat registrasi!', 'danger')
-    
-    return render_template('register.html')
-
 def get_today_attendance(student_id):
     student = db.session.get(Student, student_id)  # Updated from query.get()
     if not student:

@@ -19,7 +19,7 @@
     <title>{% block title %}Sistem Absensi PKL{% endblock %}</title>
 </head>
 <body>
-    {% if session.get('logged_in') or request.endpoint in ['register'] %}
+    {% if session.get('logged_in') %}
     <header class="header">
         <nav class="nav-container">
             <div class="brand-container">
@@ -32,7 +32,6 @@
                 </a>
             </div>
 
-            {% if session.get('logged_in') %}
             <div class="digital-clock">
                 <span class="time"></span>
                 <span class="date"></span>
@@ -64,7 +63,6 @@
                     <span>Logout</span>
                 </a>
             </div>
-            {% endif %}
 
             <button class="theme-toggle" aria-label="Toggle theme">
                 <i class="fas fa-sun"></i>

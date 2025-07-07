@@ -5,6 +5,13 @@
 {% block content %}
 <div class="login-container">
     <h2>Login Siswa PKL</h2>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
     <form method="POST" action="{{ url_for('login') }}" class="login-form">
         <div class="form-group">
             <label for="email">Email:</label>
@@ -15,7 +22,6 @@
             <input type="password" id="password" name="password" required>
         </div>
         <button type="submit" class="btn-primary">Login</button>
-        <p class="text-center">Belum punya akun? <a href="{{ url_for('register') }}">Daftar disini</a></p>
     </form>
 </div>
 {% endblock %}
