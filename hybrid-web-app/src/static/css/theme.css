@@ -88,6 +88,7 @@ body {
     z-index: 1000;
     transition: all 0.3s ease;
     height: var(--header-height);
+    margin-top: 18px;
 }
 
 .nav-container {
@@ -544,6 +545,21 @@ th {
     }
 }
 
+/* Tambahkan jarak antara navbar/header dengan konten utama */
+.header {
+    margin-top: 18px;
+}
+
+main.container {
+    margin-top: 90px !important; /* pastikan konten turun, sesuaikan dengan tinggi header */
+}
+
+@media (max-width: 900px) {
+    main.container {
+        margin-top: 70px !important;
+    }
+}
+
 /* History styles */
 .history-container {
     background: var(--history-bg);
@@ -702,4 +718,62 @@ th {
 [data-theme="dark"] .digital-clock .date {
     color: #fff !important;
     text-shadow: none;
+}
+
+/* Tambahan agar teks navbar tetap terlihat di mode gelap */
+.nav-link, .nav-link span, .nav-link i {
+    color: var(--nav-text) !important;
+    transition: color 0.2s;
+}
+[data-theme="dark"] .nav-link, [data-theme="dark"] .nav-link span, [data-theme="dark"] .nav-link i {
+    color: var(--nav-text) !important;
+}
+[data-theme="dark"] .nav-link.active, [data-theme="dark"] .nav-link:active, [data-theme="dark"] .nav-link:hover {
+    color: var(--nav-text-hover) !important;
+}
+
+/* Pertegas warna teks navbar dan judul di mode gelap */
+.header, .nav-logo, .logo-text, .header .nav-link, .header .nav-link span, .header .nav-link i {
+    color: var(--nav-text) !important;
+}
+[data-theme="dark"] .header, [data-theme="dark"] .nav-logo, [data-theme="dark"] .logo-text, [data-theme="dark"] .header .nav-link, [data-theme="dark"] .header .nav-link span, [data-theme="dark"] .header .nav-link i {
+    color: #fff !important;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+}
+[data-theme="dark"] .header {
+    background-color: #181c24 !important;
+}
+[data-theme="dark"] .nav-logo img {
+    filter: brightness(1.2) contrast(1.2);
+}
+
+/* Responsive fix: pastikan konten tidak melebar dan padding cukup di mobile */
+main.container, .profile-container {
+    width: 100% !important;
+    max-width: 100vw !important;
+    box-sizing: border-box;
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+}
+
+@media (max-width: 600px) {
+    .profile-header {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 16px 6px;
+        gap: 12px;
+    }
+    .profile-container {
+        padding: 8px !important;
+    }
+    .profile-grid {
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+    }
+    .profile-card {
+        padding: 8px !important;
+    }
+    .card-header, .card-body {
+        padding: 10px !important;
+    }
 }
