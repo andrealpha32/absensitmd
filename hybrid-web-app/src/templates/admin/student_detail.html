@@ -7,7 +7,6 @@
     <h2>Detail Siswa PKL</h2>
     <div class="student-info">
         <h3>{{ student.name }}</h3>
-        <p>Email: {{ student.email }}</p>
         <p>Perusahaan: {{ student.company or 'Belum diisi' }}</p>
         <p>Pembimbing: {{ student.supervisor or 'Belum diisi' }}</p>
     </div>
@@ -48,4 +47,26 @@
         </table>
     </div>
 </div>
+<script>
+document.getElementById('editEmailForm').onsubmit = async function(e) {
+    e.preventDefault();
+    const email = document.getElementById('emailInput').value;
+    const status = document.getElementById('emailStatus');
+    status.textContent = 'Menyimpan...';
+    status.style.color = '#888';
+    const res = await fetch(window.location.pathname + '/edit_email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'email=' + encodeURIComponent(email)
+    });
+    const data = await res.json();
+    if (data.success) {
+        status.textContent = 'Berhasil diubah!';
+        status.style.color = 'green';
+    } else {
+        status.textContent = data.error || 'Gagal mengubah email';
+        status.style.color = 'red';
+    }
+};
+</script>
 {% endblock %}

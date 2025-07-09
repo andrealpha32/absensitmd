@@ -17,6 +17,7 @@ from werkzeug.utils import secure_filename
 import openpyxl
 from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
 from openpyxl.utils import get_column_letter
+import requests
 
 try:
     from zoneinfo import ZoneInfo  # Python 3.9+
@@ -1218,3 +1219,39 @@ def admin_view_rekap(year, month):
         prev_year=prev_year,
         next_month=next_month,
         next_year=next_year)
+
+@app.route('/admin/student/<int:student_id>/edit_email', methods=['POST'])
+def admin_edit_student_email(student_id):
+    if not session.get('admin_logged_in'):
+        return jsonify({'error': 'Unauthorized'}), 401
+    new_email = request.form.get('email')
+    if not new_email:
+        return jsonify({'error': 'Email tidak boleh kosong'}), 400
+    # Cek apakah email sudah dipakai user lain
+    existing = Student.query.filter_by(email=new_email).first()
+    if existing and existing.id != student_id:
+        return jsonify({'error': 'Email sudah digunakan user lain'}), 400
+    student = Student.query.get_or_404(student_id)
+    student.email = new_email
+    student.updated_at = datetime.utcnow()
+    db.session.commit()
+    return jsonify({'success': True, 'email': new_email})
+
+@app.route('/admin/student/<int:student_id>/edit_profile', methods=['POST'])
+def admin_edit_student_profile(student_id):
+    if not session.get('admin_logged_in'):
+        return jsonify({'error': 'Unauthorized'}), 401
+    name = request.form.get('name')
+    email = request.form.get('email')
+    if not name or not email:
+        return jsonify({'error': 'Nama dan email wajib diisi'}), 400
+    # Cek email unik
+    existing = Student.query.filter_by(email=email).first()
+    if existing and existing.id != student_id:
+        return jsonify({'error': 'Email sudah digunakan user lain'}), 400
+    student = Student.query.get_or_404(student_id)
+    student.name = name
+    student.email = email
+    student.updated_at = datetime.utcnow()
+    db.session.commit()
+    return jsonify({'success': True})
