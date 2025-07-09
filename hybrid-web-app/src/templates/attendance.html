@@ -45,6 +45,9 @@
                         <button type="button" id="retakeBtn" class="btn-retake" style="display: none;">
                             <i class="fas fa-redo"></i> Ambil Ulang
                         </button>
+                        <button type="button" id="flipBtn" class="btn-flip">
+                            <i class="fas fa-sync-alt"></i> Flip Camera
+                        </button>
                     </div>
                     <div id="preview-container">
                         <img id="preview" style="display: none;">
@@ -69,18 +72,36 @@ document.addEventListener('DOMContentLoaded', function() {
     const canvas = document.getElementById('canvas');
     const captureBtn = document.getElementById('captureBtn');
     const retakeBtn = document.getElementById('retakeBtn');
+    const flipBtn = document.getElementById('flipBtn');
     const preview = document.getElementById('preview');
     const photoData = document.getElementById('photoData');
     const loading = document.querySelector('.loading');
 
-    // Access camera
-    async function startCamera() {
+    let videoDevices = [];
+    let currentDeviceIndex = 0;
+    let currentStream = null;
+
+    // Get available video input devices
+    async function getVideoDevices() {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        videoDevices = devices.filter(device => device.kind === 'videoinput');
+    }
+
+    // Start camera with specific deviceId
+    async function startCamera(deviceId = null) {
+        if (currentStream) {
+            currentStream.getTracks().forEach(track => track.stop());
+        }
+        let constraints = { video: true, audio: false };
+        if (deviceId) {
+            constraints.video = { deviceId: { exact: deviceId } };
+        } else {
+            constraints.video = { facingMode: 'environment' };
+        }
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ 
-                video: { facingMode: 'environment' }, 
-                audio: false 
-            });
+            const stream = await navigator.mediaDevices.getUserMedia(constraints);
             video.srcObject = stream;
+            currentStream = stream;
             captureBtn.disabled = false;
         } catch (err) {
             console.error('Error accessing camera:', err);
@@ -88,8 +109,25 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Start camera when page loads
-    startCamera();
+    // Flip camera
+    flipBtn.addEventListener('click', async function() {
+        if (videoDevices.length < 2) {
+            alert('Hanya satu kamera yang terdeteksi.');
+            return;
+        }
+        currentDeviceIndex = (currentDeviceIndex + 1) % videoDevices.length;
+        await startCamera(videoDevices[currentDeviceIndex].deviceId);
+    });
+
+    // On page load, get devices and start camera
+    (async function() {
+        await getVideoDevices();
+        if (videoDevices.length > 0) {
+            await startCamera(videoDevices[0].deviceId);
+        } else {
+            await startCamera();
+        }
+    })();
 
     // Capture photo
     captureBtn.addEventListener('click', function() {
