@@ -34,6 +34,9 @@
                     <button class="filter-btn" data-status="izin">Izin</button>
                     <button class="filter-btn" data-status="absent">Belum Absen</button>
                 </div>
+                <a href="{{ url_for('register') }}" class="btn btn-primary" style="margin-left:1rem;">
+                    <i class="fas fa-user-plus"></i> Tambah Siswa
+                </a>
             </div>
         </div>
         
@@ -138,6 +141,12 @@
                                             title="Edit"
                                             onclick="openEditStudentModal({{ student.id }}, '{{ student.name|escape }}', '{{ student.email|escape }}')">
                                         <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn-action delete" 
+                                            title="Hapus"
+                                            type="button"
+                                            onclick="deleteStudent({{ student.id }}, '{{ student.name|escape }}')">
+                                        <i class="fas fa-trash"></i>
                                     </button>
                                 </div>
                             </td>
@@ -343,6 +352,24 @@
         var m = document.getElementById('rekapMonth').value;
         var y = document.getElementById('rekapYear').value;
         window.location.href = '/admin/rekap-csv/' + y + '/' + m;
+    }
+    function deleteStudent(studentId, studentName) {
+        if (!confirm('Yakin ingin menghapus akun siswa "' + studentName + '"?')) return;
+        fetch('/admin/student/' + studentId + '/delete', {
+            method: 'POST',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(async res => {
+            let data = {};
+            try { data = await res.json(); } catch {}
+            if (res.ok && data.success) {
+                alert('Akun siswa berhasil dihapus.');
+                window.location.reload();
+            } else {
+                alert((data && data.error) || 'Gagal menghapus akun siswa.');
+            }
+        })
+        .catch(() => alert('Gagal menghapus akun siswa.'));
     }
     </script>
 </div>

@@ -1,0 +1,33 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Edit Absensi{% endblock %}
+
+{% block content %}
+<div class="edit-attendance-container">
+    <h2>Edit Data Absensi</h2>
+    <form method="POST">
+        <div class="form-group">
+            <label>Tanggal</label>
+            <input type="text" value="{{ attendance.date.strftime('%d-%m-%Y') }}" disabled>
+        </div>
+        <div class="form-group">
+            <label for="attendance_type">Jenis Kehadiran</label>
+            <select id="attendance_type" name="attendance_type" required>
+                <option value="hadir" {% if attendance.attendance_type == 'hadir' %}selected{% endif %}>Hadir</option>
+                <option value="izin" {% if attendance.attendance_type == 'izin' %}selected{% endif %}>Izin</option>
+                <option value="sakit" {% if attendance.attendance_type == 'sakit' %}selected{% endif %}>Sakit</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="time_in">Jam Masuk</label>
+            <input type="time" id="time_in" name="time_in" value="{{ attendance.time_in.strftime('%H:%M') if attendance.time_in else '' }}" required>
+        </div>
+        <div class="form-group">
+            <label for="activity">Aktivitas</label>
+            <textarea id="activity" name="activity" rows="3">{{ attendance.activity or '' }}</textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+        <a href="{{ url_for('admin_student_detail', student_id=attendance.student_id) }}" class="btn btn-secondary">Batal</a>
+    </form>
+</div>
+{% endblock %}

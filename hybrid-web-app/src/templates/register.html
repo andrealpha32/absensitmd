@@ -1,11 +1,42 @@
 {% extends 'base.html' %}
 
-{% block title %}Registrasi Tidak Tersedia{% endblock %}
+{% block title %}Tambah Siswa{% endblock %}
 
 {% block content %}
 <div class="login-container">
-    <h2>Registrasi Tidak Tersedia</h2>
-    <p>Fitur registrasi telah dinonaktifkan. Silakan hubungi admin untuk membuat akun.</p>
-    <a href="{{ url_for('login') }}" class="btn-primary">Kembali ke Login</a>
+    <h2>Tambah Akun Siswa</h2>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    <form method="POST" class="login-form">
+        <div class="form-group">
+            <label for="name">Nama Lengkap</label>
+            <input type="text" id="name" name="name" required 
+                   placeholder="Masukkan nama lengkap">
+        </div>
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" required 
+                   placeholder="Masukkan email">
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required 
+                   placeholder="Masukkan password">
+        </div>
+        <div class="form-group">
+            <label for="confirm_password">Konfirmasi Password</label>
+            <input type="password" id="confirm_password" name="confirm_password" required
+                   placeholder="Konfirmasi password">
+        </div>
+        <button type="submit" class="btn-primary">Tambah Siswa</button>
+    </form>
+    <div class="form-footer">
+        <a href="{{ url_for('admin_dashboard') }}">Kembali ke Dashboard</a>
+    </div>
 </div>
 {% endblock %}

@@ -17,7 +17,7 @@ from werkzeug.utils import secure_filename
 import openpyxl
 from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
 from openpyxl.utils import get_column_letter
-import requests
+
 
 try:
     from zoneinfo import ZoneInfo  # Python 3.9+
@@ -1255,3 +1255,105 @@ def admin_edit_student_profile(student_id):
     student.updated_at = datetime.utcnow()
     db.session.commit()
     return jsonify({'success': True})
+
+@app.route('/admin/student/<int:student_id>/delete', methods=['POST'])
+def admin_delete_student(student_id):
+    if not session.get('admin_logged_in'):
+        return jsonify({'error': 'Unauthorized'}), 401
+    student = Student.query.get_or_404(student_id)
+    try:
+        # Hapus semua absensi siswa terlebih dahulu (jika ada)
+        Attendance.query.filter_by(student_id=student.id).delete()
+        # Jika ada relasi lain (misal: ProfileChangeLog), hapus juga jika perlu
+        ProfileChangeLog.query.filter_by(student_id=student.id).delete()
+        # Hapus akun siswa
+        db.session.delete(student)
+        db.session.commit()
+        flash('Akun siswa berhasil dihapus.', 'success')
+        return jsonify({'success': True})
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error deleting student {student.id}: {str(e)}", exc_info=True)
+        return jsonify({'error': f'Gagal menghapus akun siswa. {str(e)}'}), 500
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    # Hanya admin yang boleh akses
+    if not session.get('admin_logged_in'):
+        flash('Hanya admin yang dapat menambah akun siswa.', 'error')
+        return redirect(url_for('admin_login'))
+
+    if request.method == 'POST':
+        name = request.form.get('name')
+        email = request.form.get('email')
+        password = request.form.get('password')
+        confirm_password = request.form.get('confirm_password')
+
+        # Validasi input
+        if not all([name, email, password, confirm_password]):
+            flash('Semua field harus diisi!', 'error')
+            return render_template('register.html')
+
+        if password != confirm_password:
+            flash('Password tidak cocok!', 'error')
+            return render_template('register.html')
+
+        if len(password) < 6:
+            flash('Password minimal 6 karakter!', 'error')
+            return render_template('register.html')
+
+        # Cek email unik
+        if Student.query.filter_by(email=email).first():
+            flash('Email sudah terdaftar!', 'error')
+            return render_template('register.html')
+
+        try:
+            # Buat user baru
+            student = Student(
+                name=name,
+                email=email,
+                password=password,  # Untuk produksi, gunakan hash password
+                created_at=datetime.utcnow(),
+                updated_at=datetime.utcnow()
+            )
+            db.session.add(student)
+            db.session.commit()
+
+            flash('Akun siswa berhasil ditambahkan!', 'success')
+            return redirect(url_for('admin_dashboard'))
+
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f"Error during registration: {str(e)}")
+            flash('Terjadi kesalahan saat menambah akun!', 'error')
+
+    return render_template('register.html')
+
+@app.route('/admin/attendance/<int:attendance_id>/edit', methods=['GET', 'POST'])
+def admin_edit_attendance(attendance_id):
+    if not session.get('admin_logged_in'):
+        flash('Unauthorized', 'error')
+        return redirect(url_for('admin_login'))
+    attendance = Attendance.query.get_or_404(attendance_id)
+    if request.method == 'POST':
+        attendance_type = request.form.get('attendance_type')
+        time_in = request.form.get('time_in')
+        activity = request.form.get('activity')
+        # Optional: handle photo update if needed
+
+        if not attendance_type or not time_in:
+            flash('Jenis kehadiran dan jam masuk wajib diisi.', 'error')
+            return redirect(request.url)
+
+        attendance.attendance_type = attendance_type
+        attendance.status = attendance_type
+        try:
+            attendance.time_in = datetime.strptime(time_in, '%H:%M').time()
+        except Exception:
+            flash('Format jam masuk tidak valid.', 'error')
+            return redirect(request.url)
+        attendance.activity = activity
+        db.session.commit()
+        flash('Data absensi berhasil diubah.', 'success')
+        return redirect(url_for('admin_student_detail', student_id=attendance.student_id))
+    return render_template('admin/edit_attendance.html', attendance=attendance)
